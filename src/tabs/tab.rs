@@ -33,7 +33,7 @@ impl Default for Tabs {
     fn default() -> Self {
         // Add the basic "get started" tab
         Self {
-            tree: RefCell::new(Tree::new(vec![Box::new(Started::new())])),
+            tree: Tree::new(vec![Box::new(Started::new())]).into(),
             id: egui::Id::new("tab_area"),
         }
     }
@@ -44,7 +44,7 @@ impl Tabs {
     pub fn new(id: impl Hash) -> Self {
         Self {
             id: egui::Id::new(id),
-            tree: Default::default(),
+            tree: Tree::new(vec![]).into(),
         }
     }
 

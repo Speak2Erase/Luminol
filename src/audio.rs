@@ -51,10 +51,11 @@ struct Inner {
 impl Default for Audio {
     fn default() -> Self {
         Self {
-            inner: RefCell::new(Inner {
+            inner: Inner {
                 outputstream: once_cell::unsync::Lazy::new(|| OutputStream::try_default().unwrap()),
                 sinks: HashMap::new(),
-            }),
+            }
+            .into(),
         }
     }
 }

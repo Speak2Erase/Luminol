@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminol.  If not, see <http://www.gnu.org/licenses/>.
 
-use once_cell::sync::Lazy;
-use ron::ser::{to_string_pretty, PrettyConfig};
-
 use crate::data::rmxp_structs::rpg;
 use std::{
     cell::{RefCell, RefMut},
@@ -31,12 +28,6 @@ use super::{
     rgss_structs::{Table1, Table3},
     rmxp_structs::intermediate,
 };
-
-static CONFIG: Lazy<PrettyConfig> = Lazy::new(|| {
-    PrettyConfig::new()
-        .struct_names(true)
-        .separate_tuple_members(true)
-});
 
 /// A struct representing a cache of the current data.
 /// This is done so data stored here can be written to the disk on demand.
@@ -67,59 +58,59 @@ impl DataCache {
 
         *self.actors.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/Actors.ron")
+                .read_data("Data/Actors.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read Actors: {}", s))?,
         );
 
         *self.animations.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/Animations.ron")
+                .read_data("Data/Animations.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read Animations: {}", s))?,
         );
 
         *self.system.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/System.ron")
+                .read_data("Data/System.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read System: {}", s))?,
         );
 
         *self.mapinfos.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/MapInfos.ron")
+                .read_data("Data/MapInfos.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read MapInfos: {}", s))?,
         );
 
         *self.tilesets.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/Tilesets.ron")
+                .read_data("Data/Tilesets.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read Tilesets: {}", s))?,
         );
 
         *self.common_events.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/CommonEvents.ron")
+                .read_data("Data/CommonEvents.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read Common Events: {}", s))?,
         );
 
         *self.items.borrow_mut() = Some(
             filesystem
-                .read_data("Data_RON/Items.ron")
+                .read_data("Data/Items.rxdata")
                 .await
                 .map_err(|s| format!("Failed to read Items: {}", s))?,
         );
 
-        let mut scripts = filesystem.read_data("Data_RON/xScripts.ron").await;
+        let mut scripts = filesystem.read_data("Data/xScripts.rxdata").await;
 
         if let Err(e) = scripts {
             println!("Attempted loading xScripts failed with {}", e);
 
-            scripts = filesystem.read_data("Data_RON/Scripts.ron").await;
+            scripts = filesystem.read_data("Data/Scripts.rxdata").await;
         } else {
             self.config.borrow_mut().as_mut().unwrap().scripts_path = "xScripts".to_string();
         }
@@ -141,7 +132,7 @@ impl DataCache {
         let has_map = self.maps.borrow().contains_key(&id);
         if !has_map {
             let map = filesystem
-                .read_data(format!("Data_RON/Map{:0>3}.ron", id))
+                .read_data(format!("Data/Map{:0>3}.rxdata", id))
                 .await
                 .map_err(|e| format!("Failed to load map: {}", e))?;
             self.maps.borrow_mut().insert(id, map);
@@ -205,15 +196,15 @@ impl DataCache {
 
     /// Save the local config.
     pub async fn save_config(&self, filesystem: &impl Filesystem) -> Result<(), String> {
-        let config_str = self
+        let config_data = self
             .config
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(config_str) = config_str {
+        if let Some(config_data) = config_data {
             filesystem
-                .save_data(".luminol", &config_str?)
+                .save_data(".luminol", &config_data?)
                 .await
                 .map_err(|_| "Failed to write Config data")?;
         }
@@ -229,128 +220,123 @@ impl DataCache {
         // Write map data and clear map cache.
         // We serialize all of these first before writing them to the disk to avoid bringing a refcell across an await.
         // A RwLock may be used in the future to solve this, though.
-        let maps_strs: HashMap<_, _> = {
+        let maps: HashMap<_, _> = {
             let maps = self.maps.borrow();
             maps.iter()
-                .map(|(id, map)| {
-                    (
-                        *id,
-                        to_string_pretty(&map, CONFIG.clone()).map_err(|e| e.to_string()),
-                    )
-                })
+                .map(|(id, map)| (*id, alox_48::to_bytes(map).map_err(|e| e.to_string())))
                 .collect()
         };
 
-        for (id, map) in maps_strs {
+        for (id, map) in maps {
             filesystem
-                .save_data(format!("Data_RON/Map{:0>3}.ron", id), &map?)
+                .save_data(format!("Data/Map{:0>3}.rxdata", id), &map?)
                 .await
                 .map_err(|e| format!("Failed to write Map data {e}"))?
         }
 
-        let tilesets_str = self
+        let tilesets = self
             .tilesets
             .borrow()
             .as_ref()
-            .map(|t| to_string_pretty(&t, CONFIG.clone()).map_err(|e| e.to_string()));
-        if let Some(tilesets_str) = tilesets_str {
+            .map(|t| alox_48::to_bytes(t).map_err(|e| e.to_string()));
+        if let Some(tilesets) = tilesets {
             filesystem
-                .save_data("Data_RON/Tilesets.ron", &tilesets_str?)
+                .save_data("Data/Tilesets.rxdata", &tilesets?)
                 .await
                 .map_err(|_| "Failed to write Tileset data")?;
         }
 
-        let mapinfos_str = self
+        let mapinfos = self
             .mapinfos
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
-        if let Some(mapinfos_str) = mapinfos_str {
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
+        if let Some(mapinfos) = mapinfos {
             filesystem
-                .save_data("Data_RON/MapInfos.ron", &mapinfos_str?)
+                .save_data("Data/MapInfos.rxdata", &mapinfos?)
                 .await
                 .map_err(|_| "Failed to write MapInfos data")?;
         }
 
-        let system_str = self
+        let system = self
             .system
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(system_str) = system_str {
+        if let Some(system) = system {
             filesystem
-                .save_data("Data_RON/System.ron", &system_str?)
+                .save_data("Data/System.rxdata", &system?)
                 .await
                 .map_err(|_| "Failed to write System data")?;
         }
 
-        let actors_str = self
+        let actors = self
             .actors
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(actors_str) = actors_str {
+        if let Some(actors) = actors {
             filesystem
-                .save_data("Data_RON/Actors.ron", &actors_str?)
+                .save_data("Data/Actors.rxdata", &actors?)
                 .await
                 .map_err(|_| "Failed to write Actor data")?;
         }
 
-        let animations_str = self
+        let animations = self
             .animations
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(animations_str) = animations_str {
+        if let Some(animations) = animations {
             filesystem
-                .save_data("Data_RON/Animations.ron", &animations_str?)
+                .save_data("Data/Animations.rxdata", &animations?)
                 .await
                 .map_err(|_| "Failed to write Animation data")?;
         }
 
-        let common_events_str = self
+        let common_events = self
             .common_events
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(common_events_str) = common_events_str {
+        if let Some(common_events) = common_events {
             filesystem
-                .save_data("Data_RON/CommonEvents.ron", &common_events_str?)
+                .save_data("Data/CommonEvents.rxdata", &common_events?)
                 .await
                 .map_err(|_| "Failed to write Common Event data")?;
         }
 
-        let scripts_str = self
+        let scripts = self
             .scripts
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
         let script_path = self
             .config()
             .as_ref()
             .map(|c| c.scripts_path.clone())
             .unwrap_or_else(|| "Scripts".to_string());
-        if let Some(scripts_str) = scripts_str {
+        if let Some(scripts) = scripts {
             filesystem
-                .save_data(format!("Data_RON/{script_path}.ron"), &scripts_str?)
+                .save_data(format!("Data/{script_path}.rxdata"), &scripts?)
                 .await
                 .map_err(|_| "Failed to write Script data")?;
         }
 
-        let items_str = self
+        let items = self
             .items
             .borrow()
             .as_ref()
-            .map(|m| to_string_pretty(&m, CONFIG.clone()).map_err(|e| e.to_string()));
+            .map(|m| alox_48::to_bytes(m).map_err(|e| e.to_string()));
 
-        if let Some(items_str) = items_str {
+        if let Some(items) = items {
             filesystem
-                .save_data("Data_RON/Items.ron", &items_str?)
+                .save_data("Data/Items.rxdata", &items?)
                 .await
                 .map_err(|_| "Failed to write Item data")?;
         }

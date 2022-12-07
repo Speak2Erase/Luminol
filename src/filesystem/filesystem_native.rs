@@ -99,10 +99,8 @@ impl super::filesystem_trait::Filesystem for Filesystem {
             .ok_or_else(|| "Project not open".to_string())?
             .join(path);
 
-        let data = async_fs::read_to_string(&path)
-            .await
-            .map_err(|e| e.to_string())?;
-        ron::from_str(&data).map_err(|e| format!("Loading {:?}: {e}", path))
+        let data = async_fs::read(&path).await.map_err(|e| e.to_string())?;
+        alox_48::from_bytes(&data).map_err(|e| e.to_string())
     }
 
     /// Read bytes from a file.

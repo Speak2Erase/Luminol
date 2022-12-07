@@ -110,6 +110,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "alox-48"
+version = "0.1.0"
+source = "git+https://github.com/Speak2Erase/alox-48#8123d896e240c46d9bd4ddc35780a7daefdc9fd4"
+dependencies = [
+ "enum-as-inner",
+ "indexmap",
+ "nom",
+ "num-traits",
+ "ordered-float",
+ "serde",
+]
+
+[[package]]
 name = "alsa"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -339,9 +352,9 @@ checksum = "7a40729d2133846d9ed0ea60a8b9541bccddab49cd30f0715a1da672fe9a2524"
 
 [[package]]
 name = "async-trait"
-version = "0.1.58"
+version = "0.1.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e805d94e6b5001b651426cf4cd446b1ab5f319d27bab5c644f61de0a804360c"
+checksum = "31e6e93155431f3931513b243d371981bb2770112b370c82745a1d19d2f99364"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1324,7 +1337,7 @@ dependencies = [
 [[package]]
 name = "egui_dock"
 version = "0.2.1"
-source = "git+https://github.com/Adanos020/egui_dock?rev=ae1907505c94a4923328ebf956bd0c054a1a4091#ae1907505c94a4923328ebf956bd0c054a1a4091"
+source = "git+https://github.com/Adanos020/egui_dock?rev=3ea7524e6da2e1aaeff85456a85b1c3b154c136c#3ea7524e6da2e1aaeff85456a85b1c3b154c136c"
 dependencies = [
  "egui",
 ]
@@ -2406,6 +2419,7 @@ dependencies = [
 name = "luminol"
 version = "0.3.3"
 dependencies = [
+ "alox-48",
  "async-fs",
  "async-trait",
  "cfg-if",
@@ -2424,7 +2438,6 @@ dependencies = [
  "git-version",
  "image",
  "js-sys",
- "num-traits",
  "once_cell",
  "poll-promise",
  "puffin_egui",
@@ -2898,6 +2911,15 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "ordered-float"
+version = "3.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d84eb1409416d254e4a9c8fa56cc24701755025b458f0fcd8e59e1f5f40c23bf"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]

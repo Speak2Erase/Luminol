@@ -56,6 +56,8 @@ pub mod windows {
     pub mod script_edit;
     /// The sound test.
     pub mod sound_test;
+    /// The tileset editor.
+    pub mod tileset;
     /// Traits and structs related to windows.
     pub mod window;
 }
@@ -248,7 +250,7 @@ impl UpdateInfo {
             audio: Default::default(),
             toasts: Default::default(),
             gl,
-            saved_state: RefCell::new(state),
+            saved_state: state.into(),
             toolbar: Default::default(),
         }
     }
