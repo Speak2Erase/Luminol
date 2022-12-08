@@ -1,4 +1,5 @@
 #![allow(missing_docs)]
+use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
 /// **A struct representing an RGBA color.**
@@ -181,8 +182,24 @@ pub struct Table3 {
 }
 
 impl From<&[u8]> for Table3 {
-    fn from(value: &[u8]) -> Self {
-        Default::default()
+    fn from(mut value: &[u8]) -> Self {
+        assert_eq!(value.get_i32_le(), 3);
+        let xsize = value.get_i32_le() as _;
+        let ysize = value.get_i32_le() as _;
+        let zsize = value.get_i32_le() as _;
+        assert_eq!(value.get_i32_le() as usize, xsize * ysize * zsize);
+
+        let data = bytemuck::cast_slice::<_, i16>(value)
+            .iter()
+            .map(|d| *d as _)
+            .collect();
+
+        Self {
+            xsize,
+            ysize,
+            zsize,
+            data,
+        }
     }
 }
 

@@ -107,19 +107,19 @@ impl DataCache {
         );
 
         // TODO
-        // let mut scripts = filesystem.read_data("Data/xScripts.rxdata").await;
-        //
-        // if let Err(e) = scripts {
-        //     println!("Attempted loading xScripts failed with {}", e);
-        //
-        //     scripts = filesystem.read_data("Data/Scripts.rxdata").await;
-        // } else {
-        //     self.config.borrow_mut().as_mut().unwrap().scripts_path = "xScripts".to_string();
-        // }
-        //
-        // *self.scripts.borrow_mut() = Some(
-        //     scripts.map_err(|s| format!("Failed to read Scripts (tried xScripts first): {}", s))?,
-        // );
+        let mut scripts = filesystem.read_data("Data/xScripts.rxdata").await;
+
+        if let Err(e) = scripts {
+            println!("Attempted loading xScripts failed with {}", e);
+
+            scripts = filesystem.read_data("Data/Scripts.rxdata").await;
+        } else {
+            self.config.borrow_mut().as_mut().unwrap().scripts_path = "xScripts".to_string();
+        }
+
+        *self.scripts.borrow_mut() = Some(
+            scripts.map_err(|s| format!("Failed to read Scripts (tried xScripts first): {}", s))?,
+        );
 
         self.maps.borrow_mut().clear();
         Ok(())

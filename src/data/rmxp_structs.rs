@@ -619,9 +619,22 @@ pub mod intermediate {
 
     #[allow(missing_docs)]
     #[derive(Debug, Deserialize, Serialize, Clone)]
+    #[serde(from = "alox_48::Value")]
     pub struct Script {
         pub id: usize,
         pub name: String,
         pub data: Vec<u8>,
+    }
+
+    impl From<alox_48::Value> for Script {
+        fn from(value: alox_48::Value) -> Self {
+            let arr = value.into_array().unwrap();
+
+            Self {
+                id: arr[0].clone().into_integer().unwrap() as _,
+                name: arr[1].clone().into_string().unwrap(),
+                data: arr[2].clone().into_bytes().unwrap(),
+            }
+        }
     }
 }
