@@ -20,6 +20,7 @@ use std::sync::Arc;
 
 use puffin_egui::puffin;
 
+use crate::filesystem::filesystem_trait::Filesystem;
 use crate::{components::top_bar::TopBar, saved_state::SavedState, UpdateInfo};
 
 /// The main Luminol struct. Handles rendering, GUI state, that sort of thing.

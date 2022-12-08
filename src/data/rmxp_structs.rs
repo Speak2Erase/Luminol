@@ -600,7 +600,6 @@ pub mod rpg {
 }
 
 pub mod intermediate {
-    use crate::data::commands::ParameterType;
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -608,14 +607,14 @@ pub mod intermediate {
     pub struct EventCommand {
         pub code: i32,
         pub indent: usize,
-        pub parameters: Vec<ParameterType>,
+        pub parameters: Vec<alox_48::Value>,
     }
 
     #[derive(Default, Debug, Deserialize, Serialize, Clone, PartialEq)]
     #[allow(missing_docs)]
     pub struct MoveCommand {
         pub code: i32,
-        pub parameters: Vec<ParameterType>,
+        pub parameters: Vec<alox_48::Value>,
     }
 
     #[allow(missing_docs)]

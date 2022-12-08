@@ -172,11 +172,18 @@ impl IndexMut<(usize, usize)> for Table2 {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 /// 3D table. See [`Table2`].
+#[serde(from = "&[u8]")]
 pub struct Table3 {
     xsize: usize,
     ysize: usize,
     zsize: usize,
     data: Vec<i32>,
+}
+
+impl From<&[u8]> for Table3 {
+    fn from(value: &[u8]) -> Self {
+        Default::default()
+    }
 }
 
 use std::slice::Iter;

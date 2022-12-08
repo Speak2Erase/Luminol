@@ -24,28 +24,6 @@ use super::rmxp_structs::intermediate;
 use super::{rgss_structs::*, rmxp_structs::rpg};
 use enum_as_inner::EnumAsInner;
 
-#[derive(Debug, Deserialize, Serialize, Clone, EnumAsInner, PartialEq)]
-#[allow(missing_docs)]
-pub enum ParameterType {
-    Integer(i32),
-    String(String),
-    Color(Color),
-    Tone(Tone),
-    AudioFile(rpg::AudioFile),
-    Float(f32),
-    MoveRoute(rpg::MoveRoute),
-    MoveCommand(MoveCommand),
-    Array(Vec<String>),
-    TrueClass(bool),
-    FalseClass(bool),
-}
-
-impl From<String> for ParameterType {
-    fn from(s: String) -> Self {
-        Self::String(s)
-    }
-}
-
 // FIXME: NOT ALL OF THESE ARE KNOWN
 
 /// An enum representing event commands.
@@ -244,10 +222,10 @@ pub enum CommandKind {
     /// Invalid, invalid command ID
     Invalid {
         code: i32,
-        parameters: Vec<ParameterType>,
+        parameters: Vec<alox_48::Value>,
     },
     /// Fields: (params: [`Vec<ParameterType>`])
-    Custom { params: Vec<ParameterType> },
+    Custom { params: Vec<alox_48::Value> },
     /// Insert command
     #[default]
     Insert,
@@ -437,7 +415,7 @@ pub enum VariableOperation {
 }
 
 impl Command {
-    fn from_cmd(cmd: intermediate::EventCommand) -> Result<Self, ParameterType> {
+    fn from_cmd(cmd: intermediate::EventCommand) -> Result<Self, alox_48::Value> {
         use ActorCondition::*;
         use ConditionalKind::*;
         use ConditionalOperator::*;
@@ -459,11 +437,16 @@ impl Command {
                     text: parameters[0].clone().into_string()?,
                 },
                 102 => Choices {
-                    choices: parameters[0].clone().into_array()?,
-                    cancel_type: parameters[1].clone().into_integer()?,
+                    choices: parameters[0]
+                        .clone()
+                        .into_array()?
+                        .into_iter()
+                        .map(alox_48::Value::into_string)
+                        .collect::<Result<Vec<_>, _>>()?,
+                    cancel_type: parameters[1].clone().into_integer()? as _,
                 },
                 402 => When {
-                    choice: parameters[0].clone().into_integer()?,
+                    choice: parameters[0].clone().into_integer()? as _,
                 },
                 403 => WhenCancel,
                 404 => ChoiceEnd,
@@ -480,7 +463,7 @@ impl Command {
                     id: parameters[0].clone().into_integer()? as usize,
                 },
                 106 => CommandKind::Wait {
-                    time: parameters[0].clone().into_integer()?,
+                    time: parameters[0].clone().into_integer()? as _,
                 },
                 108 => Comment {
                     text: parameters[0].clone().into_string()?,
@@ -509,7 +492,7 @@ impl Command {
                             if parameters[2].clone().into_integer()? == 0 {
                                 Variable {
                                     id,
-                                    const_value: Some(parameters[3].clone().into_integer()?),
+                                    const_value: Some(parameters[3].clone().into_integer()? as _),
                                     variable_value: None,
                                     operator,
                                 }
@@ -529,7 +512,7 @@ impl Command {
                             state: parameters[2].clone().into_integer()? == 0,
                         },
                         3 => Timer {
-                            seconds: parameters[1].clone().into_integer()?,
+                            seconds: parameters[1].clone().into_integer()? as _,
                             or_more: parameters[2].clone().into_integer()? == 0,
                         },
                         4 => {
@@ -572,7 +555,7 @@ impl Command {
                             },
                         },
                         7 => Gold {
-                            amount: parameters[1].clone().into_integer()?,
+                            amount: parameters[1].clone().into_integer()? as _,
                             or_more: parameters[2].clone().into_integer()? == 0,
                         },
                         8 => Item {
@@ -613,11 +596,11 @@ impl Command {
                     range: (parameters[0].clone().into_integer()? as usize)
                         ..=(parameters[1].clone().into_integer()? as usize),
                     kind: match parameters[3].clone().into_integer()? {
-                        0 => VariableKind::Constant(parameters[4].clone().into_integer()?),
+                        0 => VariableKind::Constant(parameters[4].clone().into_integer()? as _),
                         1 => VariableKind::Variable(parameters[4].clone().into_integer()? as usize),
                         2 => VariableKind::Random(
-                            (parameters[0].clone().into_integer()?)
-                                ..=(parameters[1].clone().into_integer()?),
+                            (parameters[0].clone().into_integer()? as _)
+                                ..=(parameters[1].clone().into_integer()? as _),
                         ),
                         3 => VariableKind::Item(parameters[4].clone().into_integer()? as usize),
                         4 => VariableKind::Actor(
@@ -659,7 +642,7 @@ impl Command {
                             },
                         ),
                         6 => VariableKind::Character(
-                            parameters[4].clone().into_integer()?,
+                            parameters[4].clone().into_integer()? as _,
                             match parameters[5].clone().into_integer()? {
                                 0 => CharacterVar::X,
                                 1 => CharacterVar::Y,
@@ -700,7 +683,7 @@ impl Command {
                     id: parameters[0].clone().into_integer()? as usize,
                     operation: Operation {
                         operand: match parameters[2].clone().into_integer()? {
-                            0 => Operand::Constant(parameters[3].clone().into_integer()?),
+                            0 => Operand::Constant(parameters[3].clone().into_integer()? as _),
                             1 => Operand::Variable(parameters[3].clone().into_integer()? as usize),
                             _ => panic!("Invalid operand type"),
                         },
@@ -724,9 +707,9 @@ impl Command {
                 413 => RepeatAbove,
                 201 => TransferPlayer {
                     variable: parameters[0].clone().into_integer()? != 0,
-                    transfer_id: parameters[1].clone().into_integer()?,
-                    transfer_x: parameters[2].clone().into_integer()?,
-                    transfer_y: parameters[3].clone().into_integer()?,
+                    transfer_id: parameters[1].clone().into_integer()? as _,
+                    transfer_x: parameters[2].clone().into_integer()? as _,
+                    transfer_y: parameters[3].clone().into_integer()? as _,
                     direction: match parameters[4].clone().into_integer()? {
                         0 => Direction::Retain,
                         2 => Direction::Down,
@@ -743,35 +726,35 @@ impl Command {
                     speed: parameters[2].clone().into_integer()? as usize,
                 },
                 207 => PlayAnimation {
-                    target: parameters[0].clone().into_integer()?,
+                    target: parameters[0].clone().into_integer()? as _,
                     id: parameters[1].clone().into_integer()? as usize,
                 },
                 209 => MoveRoute {
-                    target: parameters[0].clone().into_integer()?,
-                    route: parameters[1].clone().into_move_route()?,
+                    target: parameters[0].clone().into_integer()? as _,
+                    route: rpg::MoveRoute::default(), // TODO
                 },
                 509 => MoveDisplay,
                 210 => WaitMoveRoute,
                 223 => ScreenTone {
-                    tone: parameters[0].clone().into_tone()?,
-                    duration: parameters[1].clone().into_integer()?,
+                    tone: Tone::default(), // TODO
+                    duration: parameters[1].clone().into_integer()? as _,
                 },
                 224 => ScreenFlash {
-                    color: parameters[0].clone().into_color()?,
-                    duration: parameters[1].clone().into_integer()?,
+                    color: Color::default(), // TODO
+                    duration: parameters[1].clone().into_integer()? as _,
                 },
                 225 => ScreenShake {
-                    power: parameters[0].clone().into_integer()?,
-                    speed: parameters[1].clone().into_integer()?,
-                    time: parameters[2].clone().into_integer()?,
+                    power: parameters[0].clone().into_integer()? as _,
+                    speed: parameters[1].clone().into_integer()? as _,
+                    time: parameters[2].clone().into_integer()? as _,
                 },
                 231 => ShowPicture {
                     id: parameters[0].clone().into_integer()? as usize,
                     name: parameters[1].clone().into_string()?,
                     center: parameters[2].clone().into_integer()? != 0,
                     variable: parameters[3].clone().into_integer()? != 0,
-                    x: parameters[4].clone().into_integer()?,
-                    y: parameters[5].clone().into_integer()?,
+                    x: parameters[4].clone().into_integer()? as _,
+                    y: parameters[5].clone().into_integer()? as _,
                     zoom_x: parameters[6].clone().into_integer()? as usize,
                     zoom_y: parameters[7].clone().into_integer()? as usize,
                     opacity: parameters[8].clone().into_integer()? as u8,
@@ -787,8 +770,8 @@ impl Command {
                     duration: parameters[1].clone().into_integer()? as usize,
                     center: parameters[2].clone().into_integer()? != 0,
                     variable: parameters[3].clone().into_integer()? != 0,
-                    x: parameters[4].clone().into_integer()?,
-                    y: parameters[5].clone().into_integer()?,
+                    x: parameters[4].clone().into_integer()? as _,
+                    y: parameters[5].clone().into_integer()? as _,
                     zoom_x: parameters[6].clone().into_integer()? as usize,
                     zoom_y: parameters[7].clone().into_integer()? as usize,
                     opacity: parameters[8].clone().into_integer()? as u8,
@@ -802,28 +785,42 @@ impl Command {
                 235 => ErasePicture {
                     id: parameters[0].clone().into_integer()? as usize,
                 },
-
+                // TODO
                 241 => PlayBGM {
-                    file: parameters[0].clone().into_audio_file()?,
+                    file: rpg::AudioFile {
+                        name: "todo!()".to_string(),
+                        volume: 100,
+                        pitch: 100,
+                    },
                 },
                 242 => FadeBGM {
-                    time: parameters[0].clone().into_integer()?,
+                    time: parameters[0].clone().into_integer()? as _,
                 },
                 247 => MemorizeBGM,
                 248 => RestoreBGM,
+                // TODO
                 249 => PlayME {
-                    file: parameters[0].clone().into_audio_file()?,
+                    file: rpg::AudioFile {
+                        name: "todo!()".to_string(),
+                        volume: 100,
+                        pitch: 100,
+                    },
                 },
+                // TODO
                 250 => CommandKind::PlaySE {
-                    file: parameters[0].clone().into_audio_file()?,
+                    file: rpg::AudioFile {
+                        name: "todo!()".to_string(),
+                        volume: 100,
+                        pitch: 100,
+                    },
                 },
 
                 322 => ChangeActorGraphic {
                     id: parameters[0].clone().into_integer()? as usize,
                     character_name: parameters[1].clone().into_string()?,
-                    character_hue: parameters[2].clone().into_integer()?,
+                    character_hue: parameters[2].clone().into_integer()? as _,
                     battler_name: parameters[3].clone().into_string()?,
-                    battler_hue: parameters[4].clone().into_integer()?,
+                    battler_hue: parameters[4].clone().into_integer()? as _,
                 },
 
                 355 => CommandKind::Script {
@@ -846,7 +843,7 @@ impl TryFrom<intermediate::EventCommand> for Command {
 
     fn try_from(cmd: intermediate::EventCommand) -> Result<Self, Self::Error> {
         Command::from_cmd(cmd)
-            .map_err(|e: ParameterType| format!("Unexpected parameter type {:?}", e))
+            .map_err(|e: alox_48::Value| format!("Unexpected parameter type {:?}", e))
     }
 }
 
@@ -993,7 +990,7 @@ pub enum MoveCommand {
     Break,
     Invalid {
         code: i32,
-        parameters: Vec<ParameterType>,
+        parameters: Vec<alox_48::Value>,
     },
 }
 
@@ -1018,11 +1015,11 @@ impl From<intermediate::MoveCommand> for MoveCommand {
             12 => Forward,
             13 => Backwards,
             14 => Jump {
-                x_plus: parameters[0].clone().into_integer().unwrap(),
-                y_plus: parameters[1].clone().into_integer().unwrap(),
+                x_plus: parameters[0].clone().into_integer().unwrap() as _,
+                y_plus: parameters[1].clone().into_integer().unwrap() as _,
             },
             15 => MoveCommand::Wait {
-                time: parameters[0].clone().into_integer().unwrap(),
+                time: parameters[0].clone().into_integer().unwrap() as _,
             },
             16 => TurnDown,
             17 => TurnLeft,
@@ -1058,19 +1055,24 @@ impl From<intermediate::MoveCommand> for MoveCommand {
             39 => AlwaysTopON,
             40 => AlwaysTopOFF,
             41 => ChangeGraphic {
-                character_name: parameters[0].clone().into_string().unwrap(),
-                character_hue: parameters[1].clone().into_integer().unwrap(),
-                direction: parameters[2].clone().into_integer().unwrap(),
-                pattern: parameters[3].clone().into_integer().unwrap(),
+                character_name: parameters[0].clone().into_string().unwrap() as _,
+                character_hue: parameters[1].clone().into_integer().unwrap() as _,
+                direction: parameters[2].clone().into_integer().unwrap() as _,
+                pattern: parameters[3].clone().into_integer().unwrap() as _,
             },
             42 => ChangeOpacity {
-                opacity: parameters[0].clone().into_integer().unwrap(),
+                opacity: parameters[0].clone().into_integer().unwrap() as _,
             },
             43 => ChangeBlend {
-                blend: parameters[0].clone().into_integer().unwrap(),
+                blend: parameters[0].clone().into_integer().unwrap() as _,
             },
+            // TODO
             44 => Self::PlaySE {
-                file: parameters[0].clone().into_audio_file().unwrap(),
+                file: rpg::AudioFile {
+                    name: "todo!()".to_string(),
+                    volume: 100,
+                    pitch: 100,
+                },
             },
             45 => Self::Script {
                 text: parameters[0].clone().into_string().unwrap(),
