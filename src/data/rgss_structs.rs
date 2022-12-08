@@ -41,9 +41,19 @@ use std::ops::{Index, IndexMut};
 /// We don't particularly need dynamically sized arrays anyway.
 /// 1D Table.
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(from = "&[u8]")]
 pub struct Table1 {
     xsize: usize,
     data: Vec<i32>,
+}
+
+impl From<&[u8]> for Table1 {
+    fn from(value: &[u8]) -> Self {
+        Self {
+            xsize: 0,
+            data: vec![],
+        }
+    }
 }
 
 impl Table1 {
@@ -92,11 +102,22 @@ impl IndexMut<usize> for Table1 {
 
 /// 2D table. See [`Table1`].
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(from = "&[u8]")]
 pub struct Table2 {
     xsize: usize,
 
     ysize: usize,
     data: Vec<i32>,
+}
+
+impl From<&[u8]> for Table2 {
+    fn from(value: &[u8]) -> Self {
+        Self {
+            xsize: 0,
+            ysize: 0,
+            data: vec![],
+        }
+    }
 }
 
 impl Table2 {

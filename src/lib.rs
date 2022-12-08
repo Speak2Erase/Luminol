@@ -57,7 +57,7 @@ pub mod windows {
     /// The sound test.
     pub mod sound_test;
     /// The tileset editor.
-    pub mod tileset;
+    // pub mod tileset;
     /// Traits and structs related to windows.
     pub mod window;
 }
@@ -149,6 +149,8 @@ pub mod data {
     pub mod config;
     /// The data cache, used to store things before writing them to the disk.
     pub mod data_cache;
+    /// Nil padded arrays.
+    pub mod nil_padded;
     /// RGSS structs.
     pub mod rgss_structs;
     /// RMXP structs.

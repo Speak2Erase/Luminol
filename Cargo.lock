@@ -112,14 +112,17 @@ dependencies = [
 [[package]]
 name = "alox-48"
 version = "0.1.0"
-source = "git+https://github.com/Speak2Erase/alox-48#8123d896e240c46d9bd4ddc35780a7daefdc9fd4"
 dependencies = [
+ "bytemuck",
+ "color-eyre",
  "enum-as-inner",
  "indexmap",
  "nom",
  "num-traits",
  "ordered-float",
+ "pretty-hex",
  "serde",
+ "serde_path_to_error",
 ]
 
 [[package]]
@@ -3143,6 +3146,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
+name = "pretty-hex"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6fa0831dd7cc608c38a5e323422a0077678fa5744aa2be4ad91c4ece8eec8d5"
+
+[[package]]
 name = "proc-macro-crate"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3637,6 +3646,15 @@ checksum = "6ce777b7b150d76b9cf60d28b55f5847135a003f7d7350c6be7a773508ce7d45"
 dependencies = [
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serde_path_to_error"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "184c643044780f7ceb59104cef98a5a6f12cb2288a7bc701ab93a362b49fd47d"
+dependencies = [
  "serde",
 ]
 

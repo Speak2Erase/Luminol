@@ -43,7 +43,7 @@ puffin_egui = "0.18.0"
 rand = "0.8.5"
 zip = { version = "0.6.3", default-features = false, features = ["deflate"] }
 async-trait = "0.1.59"
-alox-48 = { version = "0.1.0", git = "https://github.com/Speak2Erase/alox-48" }
+alox-48 = { version = "0.1.0", path = "alox-48" }
 
 [features]
 default = ["generic-tilemap"]

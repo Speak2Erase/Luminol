@@ -25,6 +25,7 @@ use crate::filesystem::Filesystem;
 
 use super::{
     config::LocalConfig,
+    nil_padded::NilPadded,
     rgss_structs::{Table1, Table3},
     rmxp_structs::intermediate,
 };
@@ -33,15 +34,15 @@ use super::{
 /// This is done so data stored here can be written to the disk on demand.
 #[derive(Default)]
 pub struct DataCache {
-    actors: RefCell<Option<Vec<rpg::Actor>>>,
-    animations: RefCell<Option<Vec<rpg::animation::Animation>>>,
+    actors: RefCell<Option<NilPadded<rpg::Actor>>>,
+    animations: RefCell<Option<NilPadded<rpg::animation::Animation>>>,
     system: RefCell<Option<rpg::system::System>>,
-    tilesets: RefCell<Option<Vec<rpg::Tileset>>>,
+    tilesets: RefCell<Option<NilPadded<rpg::Tileset>>>,
     mapinfos: RefCell<Option<HashMap<i32, rpg::MapInfo>>>,
     maps: RefCell<HashMap<i32, rpg::Map>>,
-    common_events: RefCell<Option<Vec<rpg::CommonEvent>>>,
+    common_events: RefCell<Option<NilPadded<rpg::CommonEvent>>>,
     scripts: RefCell<Option<Vec<intermediate::Script>>>,
-    items: RefCell<Option<Vec<rpg::Item>>>,
+    items: RefCell<Option<NilPadded<rpg::Item>>>,
     config: RefCell<Option<LocalConfig>>,
 }
 
@@ -155,7 +156,7 @@ impl DataCache {
     }
 
     /// Get Tilesets.
-    pub fn tilesets(&self) -> RefMut<'_, Option<Vec<rpg::Tileset>>> {
+    pub fn tilesets(&self) -> RefMut<'_, Option<NilPadded<rpg::Tileset>>> {
         self.tilesets.borrow_mut()
     }
 
@@ -165,17 +166,17 @@ impl DataCache {
     }
 
     /// Get Animations.
-    pub fn animations(&self) -> RefMut<'_, Option<Vec<rpg::animation::Animation>>> {
+    pub fn animations(&self) -> RefMut<'_, Option<NilPadded<rpg::animation::Animation>>> {
         self.animations.borrow_mut()
     }
 
     /// Get Actors.
-    pub fn actors(&self) -> RefMut<'_, Option<Vec<rpg::Actor>>> {
+    pub fn actors(&self) -> RefMut<'_, Option<NilPadded<rpg::Actor>>> {
         self.actors.borrow_mut()
     }
 
     /// Get Common Events.
-    pub fn common_events(&self) -> RefMut<'_, Option<Vec<rpg::CommonEvent>>> {
+    pub fn common_events(&self) -> RefMut<'_, Option<NilPadded<rpg::CommonEvent>>> {
         self.common_events.borrow_mut()
     }
 
@@ -185,7 +186,7 @@ impl DataCache {
     }
 
     /// Get items.
-    pub fn items(&self) -> RefMut<'_, Option<Vec<rpg::Item>>> {
+    pub fn items(&self) -> RefMut<'_, Option<NilPadded<rpg::Item>>> {
         self.items.borrow_mut()
     }
 
@@ -346,11 +347,11 @@ impl DataCache {
 
     /// Setup default values
     pub fn setup_defaults(&self) {
-        *self.actors() = Some(vec![rpg::Actor::default()]);
-        *self.animations() = Some(vec![rpg::animation::Animation::default()]);
-        *self.common_events() = Some(vec![rpg::CommonEvent::default()]);
+        *self.actors() = Some(vec![rpg::Actor::default()].into());
+        *self.animations() = Some(vec![rpg::animation::Animation::default()].into());
+        *self.common_events() = Some(vec![rpg::CommonEvent::default()].into());
         *self.scripts() = Some(vec![]);
-        *self.items() = Some(vec![]);
+        *self.items() = Some(NilPadded::default());
 
         let mut map_infos = HashMap::new();
         map_infos.insert(
@@ -379,13 +380,16 @@ impl DataCache {
         );
         *self.maps.borrow_mut() = maps;
 
-        *self.tilesets() = Some(vec![rpg::Tileset {
-            id: 1,
-            passages: Table1::new(8),
-            priorities: Table1::new(8),
-            terrain_tags: Table1::new(8),
-            ..Default::default()
-        }]);
+        *self.tilesets() = Some(
+            vec![rpg::Tileset {
+                id: 1,
+                passages: Table1::new(8),
+                priorities: Table1::new(8),
+                terrain_tags: Table1::new(8),
+                ..Default::default()
+            }]
+            .into(),
+        );
 
         *self.system() = Some(rpg::system::System {
             magic_number: rand::random(),

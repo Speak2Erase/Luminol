@@ -30,7 +30,5 @@ impl Window for TilesetWindow {
         true
     }
 
-    fn show(&mut self, ctx: &egui::Context, open: &mut bool, info: &'static crate::UpdateInfo) {
-        
-    }
+    fn show(&mut self, ctx: &egui::Context, open: &mut bool, info: &'static crate::UpdateInfo) {}
 }

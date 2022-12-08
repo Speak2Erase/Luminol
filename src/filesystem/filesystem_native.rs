@@ -54,7 +54,7 @@ impl super::filesystem_trait::Filesystem for Filesystem {
         path: impl AsRef<Path>,
         cache: &'static DataCache,
     ) -> Result<(), String> {
-        *self.project_path.borrow_mut() = Some(path.as_ref().clone().to_path_buf());
+        *self.project_path.borrow_mut() = Some(path.as_ref().to_path_buf());
 
         *self.loading_project.borrow_mut() = true;
         let result = cache.load(self).await.map_err(|e| {
