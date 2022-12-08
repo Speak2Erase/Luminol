@@ -2420,7 +2420,7 @@ dependencies = [
 
 [[package]]
 name = "luminol"
-version = "0.3.3"
+version = "0.4.0"
 dependencies = [
  "alox-48",
  "async-fs",

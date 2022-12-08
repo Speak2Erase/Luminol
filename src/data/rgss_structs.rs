@@ -178,7 +178,7 @@ pub struct Table3 {
     xsize: usize,
     ysize: usize,
     zsize: usize,
-    data: Vec<i32>,
+    data: Vec<i16>,
 }
 
 impl From<&[u8]> for Table3 {
@@ -189,10 +189,7 @@ impl From<&[u8]> for Table3 {
         let zsize = value.get_i32_le() as _;
         assert_eq!(value.get_i32_le() as usize, xsize * ysize * zsize);
 
-        let data = bytemuck::cast_slice::<_, i16>(value)
-            .iter()
-            .map(|d| *d as _)
-            .collect();
+        let data = bytemuck::pod_collect_to_vec::<_, i16>(value);
 
         Self {
             xsize,
@@ -242,13 +239,13 @@ impl Table3 {
     }
 
     /// Return an iterator over all the elements in the table.
-    pub fn iter(&self) -> Iter<'_, i32> {
+    pub fn iter(&self) -> Iter<'_, i16> {
         self.data.iter()
     }
 }
 
 impl Index<(usize, usize, usize)> for Table3 {
-    type Output = i32;
+    type Output = i16;
 
     fn index(&self, index: (usize, usize, usize)) -> &Self::Output {
         &self.data[index.0 + (index.1 * self.xsize) + (index.2 * self.ysize)]
