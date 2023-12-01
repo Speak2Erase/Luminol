@@ -281,9 +281,9 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
                 pm_buffer_concat(output_buffer, prefix_buffer);
                 pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 flags:", 16);
                 bool found = false;
-                if (cast->base.flags & PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORD_SPLAT) {
+                if (cast->base.flags & PM_ARGUMENTS_NODE_FLAGS_KEYWORD_SPLAT) {
                     if (found) pm_buffer_append_byte(output_buffer, ',');
-                    pm_buffer_append_string(output_buffer, " contains_keyword_splat", 23);
+                    pm_buffer_append_string(output_buffer, " keyword_splat", 14);
                     found = true;
                 }
                 if (!found) pm_buffer_append_string(output_buffer, " \xe2\x88\x85", 4);
@@ -342,7 +342,7 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
             // closing_loc
             {
                 pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 closing_loc:", 22);
+                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 closing_loc:", 22);
                 pm_location_t *location = &cast->closing_loc;
                 if (location->start == NULL) {
                     pm_buffer_append_string(output_buffer, " \xe2\x88\x85\n", 5);
@@ -353,20 +353,6 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
                     prettyprint_source(output_buffer, location->start, (size_t) (location->end - location->start));
                     pm_buffer_append_string(output_buffer, "\"\n", 2);
                 }
-            }
-
-            // flags
-            {
-                pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 flags:", 16);
-                bool found = false;
-                if (cast->base.flags & PM_ARRAY_NODE_FLAGS_CONTAINS_SPLAT) {
-                    if (found) pm_buffer_append_byte(output_buffer, ',');
-                    pm_buffer_append_string(output_buffer, " contains_splat", 15);
-                    found = true;
-                }
-                if (!found) pm_buffer_append_string(output_buffer, " \xe2\x88\x85", 4);
-                pm_buffer_append_byte(output_buffer, '\n');
             }
 
             break;
@@ -832,20 +818,13 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
             // closing_loc
             {
                 pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 closing_loc:", 22);
+                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 closing_loc:", 22);
                 pm_location_t *location = &cast->closing_loc;
                 pm_buffer_append_byte(output_buffer, ' ');
                 prettyprint_location(output_buffer, parser, location);
                 pm_buffer_append_string(output_buffer, " = \"", 4);
                 prettyprint_source(output_buffer, location->start, (size_t) (location->end - location->start));
                 pm_buffer_append_string(output_buffer, "\"\n", 2);
-            }
-
-            // numbered_parameters
-            {
-                pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 numbered_parameters:", 30);
-                pm_buffer_append_format(output_buffer, " %d\n", cast->numbered_parameters);
             }
 
             break;
@@ -1176,15 +1155,6 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
                 }
             }
 
-            // name
-            {
-                pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 name:", 15);
-                pm_buffer_append_byte(output_buffer, ' ');
-                prettyprint_constant(output_buffer, parser, cast->name);
-                pm_buffer_append_byte(output_buffer, '\n');
-            }
-
             // message_loc
             {
                 pm_buffer_concat(output_buffer, prefix_buffer);
@@ -1270,7 +1240,7 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
             // flags
             {
                 pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 flags:", 16);
+                pm_buffer_append_string(output_buffer, "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 flags:", 16);
                 bool found = false;
                 if (cast->base.flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                     if (found) pm_buffer_append_byte(output_buffer, ',');
@@ -1283,6 +1253,15 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
                     found = true;
                 }
                 if (!found) pm_buffer_append_string(output_buffer, " \xe2\x88\x85", 4);
+                pm_buffer_append_byte(output_buffer, '\n');
+            }
+
+            // name
+            {
+                pm_buffer_concat(output_buffer, prefix_buffer);
+                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 name:", 15);
+                pm_buffer_append_byte(output_buffer, ' ');
+                prettyprint_constant(output_buffer, parser, cast->name);
                 pm_buffer_append_byte(output_buffer, '\n');
             }
 
@@ -4019,13 +3998,6 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
 
             break;
         }
-        case PM_IMPLICIT_REST_NODE: {
-            pm_buffer_append_string(output_buffer, "@ ImplicitRestNode (location: ", 30);
-            prettyprint_location(output_buffer, parser, &node->location);
-            pm_buffer_append_string(output_buffer, ")\n", 2);
-
-            break;
-        }
         case PM_IN_NODE: {
             pm_in_node_t *cast = (pm_in_node_t *) node;
             pm_buffer_append_string(output_buffer, "@ InNode (location: ", 20);
@@ -5381,25 +5353,18 @@ prettyprint_node(pm_buffer_t *output_buffer, const pm_parser_t *parser, const pm
             // body
             {
                 pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80 body:", 15);
+                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 body:", 15);
                 if (cast->body == NULL) {
                     pm_buffer_append_string(output_buffer, " \xe2\x88\x85\n", 5);
                 } else {
                     pm_buffer_append_byte(output_buffer, '\n');
 
                     size_t prefix_length = prefix_buffer->length;
-                    pm_buffer_append_string(prefix_buffer, "\xe2\x94\x82   ", 6);
+                    pm_buffer_append_string(prefix_buffer, "    ", 4);
                     pm_buffer_concat(output_buffer, prefix_buffer);
                     prettyprint_node(output_buffer, parser, (pm_node_t *) cast->body, prefix_buffer);
                     prefix_buffer->length = prefix_length;
                 }
-            }
-
-            // numbered_parameters
-            {
-                pm_buffer_concat(output_buffer, prefix_buffer);
-                pm_buffer_append_string(output_buffer, "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80 numbered_parameters:", 30);
-                pm_buffer_append_format(output_buffer, " %d\n", cast->numbered_parameters);
             }
 
             break;

@@ -39,3 +39,5 @@ once_cell.workspace = true
 slab.workspace = true
 
 anyhow.workspace = true
+
+prism = { version = "0.18.0", git = "https://github.com/ruby/prism", rev = "6ca8896" }

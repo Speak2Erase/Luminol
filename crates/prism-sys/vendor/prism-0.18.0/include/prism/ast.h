@@ -772,236 +772,233 @@ enum pm_node_type {
     /** ImplicitNode */
     PM_IMPLICIT_NODE = 68,
 
-    /** ImplicitRestNode */
-    PM_IMPLICIT_REST_NODE = 69,
-
     /** InNode */
-    PM_IN_NODE = 70,
+    PM_IN_NODE = 69,
 
     /** IndexAndWriteNode */
-    PM_INDEX_AND_WRITE_NODE = 71,
+    PM_INDEX_AND_WRITE_NODE = 70,
 
     /** IndexOperatorWriteNode */
-    PM_INDEX_OPERATOR_WRITE_NODE = 72,
+    PM_INDEX_OPERATOR_WRITE_NODE = 71,
 
     /** IndexOrWriteNode */
-    PM_INDEX_OR_WRITE_NODE = 73,
+    PM_INDEX_OR_WRITE_NODE = 72,
 
     /** InstanceVariableAndWriteNode */
-    PM_INSTANCE_VARIABLE_AND_WRITE_NODE = 74,
+    PM_INSTANCE_VARIABLE_AND_WRITE_NODE = 73,
 
     /** InstanceVariableOperatorWriteNode */
-    PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE = 75,
+    PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE = 74,
 
     /** InstanceVariableOrWriteNode */
-    PM_INSTANCE_VARIABLE_OR_WRITE_NODE = 76,
+    PM_INSTANCE_VARIABLE_OR_WRITE_NODE = 75,
 
     /** InstanceVariableReadNode */
-    PM_INSTANCE_VARIABLE_READ_NODE = 77,
+    PM_INSTANCE_VARIABLE_READ_NODE = 76,
 
     /** InstanceVariableTargetNode */
-    PM_INSTANCE_VARIABLE_TARGET_NODE = 78,
+    PM_INSTANCE_VARIABLE_TARGET_NODE = 77,
 
     /** InstanceVariableWriteNode */
-    PM_INSTANCE_VARIABLE_WRITE_NODE = 79,
+    PM_INSTANCE_VARIABLE_WRITE_NODE = 78,
 
     /** IntegerNode */
-    PM_INTEGER_NODE = 80,
+    PM_INTEGER_NODE = 79,
 
     /** InterpolatedMatchLastLineNode */
-    PM_INTERPOLATED_MATCH_LAST_LINE_NODE = 81,
+    PM_INTERPOLATED_MATCH_LAST_LINE_NODE = 80,
 
     /** InterpolatedRegularExpressionNode */
-    PM_INTERPOLATED_REGULAR_EXPRESSION_NODE = 82,
+    PM_INTERPOLATED_REGULAR_EXPRESSION_NODE = 81,
 
     /** InterpolatedStringNode */
-    PM_INTERPOLATED_STRING_NODE = 83,
+    PM_INTERPOLATED_STRING_NODE = 82,
 
     /** InterpolatedSymbolNode */
-    PM_INTERPOLATED_SYMBOL_NODE = 84,
+    PM_INTERPOLATED_SYMBOL_NODE = 83,
 
     /** InterpolatedXStringNode */
-    PM_INTERPOLATED_X_STRING_NODE = 85,
+    PM_INTERPOLATED_X_STRING_NODE = 84,
 
     /** KeywordHashNode */
-    PM_KEYWORD_HASH_NODE = 86,
+    PM_KEYWORD_HASH_NODE = 85,
 
     /** KeywordRestParameterNode */
-    PM_KEYWORD_REST_PARAMETER_NODE = 87,
+    PM_KEYWORD_REST_PARAMETER_NODE = 86,
 
     /** LambdaNode */
-    PM_LAMBDA_NODE = 88,
+    PM_LAMBDA_NODE = 87,
 
     /** LocalVariableAndWriteNode */
-    PM_LOCAL_VARIABLE_AND_WRITE_NODE = 89,
+    PM_LOCAL_VARIABLE_AND_WRITE_NODE = 88,
 
     /** LocalVariableOperatorWriteNode */
-    PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE = 90,
+    PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE = 89,
 
     /** LocalVariableOrWriteNode */
-    PM_LOCAL_VARIABLE_OR_WRITE_NODE = 91,
+    PM_LOCAL_VARIABLE_OR_WRITE_NODE = 90,
 
     /** LocalVariableReadNode */
-    PM_LOCAL_VARIABLE_READ_NODE = 92,
+    PM_LOCAL_VARIABLE_READ_NODE = 91,
 
     /** LocalVariableTargetNode */
-    PM_LOCAL_VARIABLE_TARGET_NODE = 93,
+    PM_LOCAL_VARIABLE_TARGET_NODE = 92,
 
     /** LocalVariableWriteNode */
-    PM_LOCAL_VARIABLE_WRITE_NODE = 94,
+    PM_LOCAL_VARIABLE_WRITE_NODE = 93,
 
     /** MatchLastLineNode */
-    PM_MATCH_LAST_LINE_NODE = 95,
+    PM_MATCH_LAST_LINE_NODE = 94,
 
     /** MatchPredicateNode */
-    PM_MATCH_PREDICATE_NODE = 96,
+    PM_MATCH_PREDICATE_NODE = 95,
 
     /** MatchRequiredNode */
-    PM_MATCH_REQUIRED_NODE = 97,
+    PM_MATCH_REQUIRED_NODE = 96,
 
     /** MatchWriteNode */
-    PM_MATCH_WRITE_NODE = 98,
+    PM_MATCH_WRITE_NODE = 97,
 
     /** MissingNode */
-    PM_MISSING_NODE = 99,
+    PM_MISSING_NODE = 98,
 
     /** ModuleNode */
-    PM_MODULE_NODE = 100,
+    PM_MODULE_NODE = 99,
 
     /** MultiTargetNode */
-    PM_MULTI_TARGET_NODE = 101,
+    PM_MULTI_TARGET_NODE = 100,
 
     /** MultiWriteNode */
-    PM_MULTI_WRITE_NODE = 102,
+    PM_MULTI_WRITE_NODE = 101,
 
     /** NextNode */
-    PM_NEXT_NODE = 103,
+    PM_NEXT_NODE = 102,
 
     /** NilNode */
-    PM_NIL_NODE = 104,
+    PM_NIL_NODE = 103,
 
     /** NoKeywordsParameterNode */
-    PM_NO_KEYWORDS_PARAMETER_NODE = 105,
+    PM_NO_KEYWORDS_PARAMETER_NODE = 104,
 
     /** NumberedReferenceReadNode */
-    PM_NUMBERED_REFERENCE_READ_NODE = 106,
+    PM_NUMBERED_REFERENCE_READ_NODE = 105,
 
     /** OptionalKeywordParameterNode */
-    PM_OPTIONAL_KEYWORD_PARAMETER_NODE = 107,
+    PM_OPTIONAL_KEYWORD_PARAMETER_NODE = 106,
 
     /** OptionalParameterNode */
-    PM_OPTIONAL_PARAMETER_NODE = 108,
+    PM_OPTIONAL_PARAMETER_NODE = 107,
 
     /** OrNode */
-    PM_OR_NODE = 109,
+    PM_OR_NODE = 108,
 
     /** ParametersNode */
-    PM_PARAMETERS_NODE = 110,
+    PM_PARAMETERS_NODE = 109,
 
     /** ParenthesesNode */
-    PM_PARENTHESES_NODE = 111,
+    PM_PARENTHESES_NODE = 110,
 
     /** PinnedExpressionNode */
-    PM_PINNED_EXPRESSION_NODE = 112,
+    PM_PINNED_EXPRESSION_NODE = 111,
 
     /** PinnedVariableNode */
-    PM_PINNED_VARIABLE_NODE = 113,
+    PM_PINNED_VARIABLE_NODE = 112,
 
     /** PostExecutionNode */
-    PM_POST_EXECUTION_NODE = 114,
+    PM_POST_EXECUTION_NODE = 113,
 
     /** PreExecutionNode */
-    PM_PRE_EXECUTION_NODE = 115,
+    PM_PRE_EXECUTION_NODE = 114,
 
     /** ProgramNode */
-    PM_PROGRAM_NODE = 116,
+    PM_PROGRAM_NODE = 115,
 
     /** RangeNode */
-    PM_RANGE_NODE = 117,
+    PM_RANGE_NODE = 116,
 
     /** RationalNode */
-    PM_RATIONAL_NODE = 118,
+    PM_RATIONAL_NODE = 117,
 
     /** RedoNode */
-    PM_REDO_NODE = 119,
+    PM_REDO_NODE = 118,
 
     /** RegularExpressionNode */
-    PM_REGULAR_EXPRESSION_NODE = 120,
+    PM_REGULAR_EXPRESSION_NODE = 119,
 
     /** RequiredKeywordParameterNode */
-    PM_REQUIRED_KEYWORD_PARAMETER_NODE = 121,
+    PM_REQUIRED_KEYWORD_PARAMETER_NODE = 120,
 
     /** RequiredParameterNode */
-    PM_REQUIRED_PARAMETER_NODE = 122,
+    PM_REQUIRED_PARAMETER_NODE = 121,
 
     /** RescueModifierNode */
-    PM_RESCUE_MODIFIER_NODE = 123,
+    PM_RESCUE_MODIFIER_NODE = 122,
 
     /** RescueNode */
-    PM_RESCUE_NODE = 124,
+    PM_RESCUE_NODE = 123,
 
     /** RestParameterNode */
-    PM_REST_PARAMETER_NODE = 125,
+    PM_REST_PARAMETER_NODE = 124,
 
     /** RetryNode */
-    PM_RETRY_NODE = 126,
+    PM_RETRY_NODE = 125,
 
     /** ReturnNode */
-    PM_RETURN_NODE = 127,
+    PM_RETURN_NODE = 126,
 
     /** SelfNode */
-    PM_SELF_NODE = 128,
+    PM_SELF_NODE = 127,
 
     /** SingletonClassNode */
-    PM_SINGLETON_CLASS_NODE = 129,
+    PM_SINGLETON_CLASS_NODE = 128,
 
     /** SourceEncodingNode */
-    PM_SOURCE_ENCODING_NODE = 130,
+    PM_SOURCE_ENCODING_NODE = 129,
 
     /** SourceFileNode */
-    PM_SOURCE_FILE_NODE = 131,
+    PM_SOURCE_FILE_NODE = 130,
 
     /** SourceLineNode */
-    PM_SOURCE_LINE_NODE = 132,
+    PM_SOURCE_LINE_NODE = 131,
 
     /** SplatNode */
-    PM_SPLAT_NODE = 133,
+    PM_SPLAT_NODE = 132,
 
     /** StatementsNode */
-    PM_STATEMENTS_NODE = 134,
+    PM_STATEMENTS_NODE = 133,
 
     /** StringNode */
-    PM_STRING_NODE = 135,
+    PM_STRING_NODE = 134,
 
     /** SuperNode */
-    PM_SUPER_NODE = 136,
+    PM_SUPER_NODE = 135,
 
     /** SymbolNode */
-    PM_SYMBOL_NODE = 137,
+    PM_SYMBOL_NODE = 136,
 
     /** TrueNode */
-    PM_TRUE_NODE = 138,
+    PM_TRUE_NODE = 137,
 
     /** UndefNode */
-    PM_UNDEF_NODE = 139,
+    PM_UNDEF_NODE = 138,
 
     /** UnlessNode */
-    PM_UNLESS_NODE = 140,
+    PM_UNLESS_NODE = 139,
 
     /** UntilNode */
-    PM_UNTIL_NODE = 141,
+    PM_UNTIL_NODE = 140,
 
     /** WhenNode */
-    PM_WHEN_NODE = 142,
+    PM_WHEN_NODE = 141,
 
     /** WhileNode */
-    PM_WHILE_NODE = 143,
+    PM_WHILE_NODE = 142,
 
     /** XStringNode */
-    PM_X_STRING_NODE = 144,
+    PM_X_STRING_NODE = 143,
 
     /** YieldNode */
-    PM_YIELD_NODE = 145,
+    PM_YIELD_NODE = 144,
 
     /** A special kind of node used for compilation. */
     PM_SCOPE_NODE
@@ -1153,7 +1150,7 @@ typedef struct pm_and_node {
  *
  * Type: PM_ARGUMENTS_NODE
  * Flags:
- *    PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORD_SPLAT
+ *    PM_ARGUMENTS_NODE_FLAGS_KEYWORD_SPLAT
  *
  * @extends pm_node_t
  */
@@ -1169,8 +1166,6 @@ typedef struct pm_arguments_node {
  * ArrayNode
  *
  * Type: PM_ARRAY_NODE
- * Flags:
- *    PM_ARRAY_NODE_FLAGS_CONTAINS_SPLAT
  *
  * @extends pm_node_t
  */
@@ -1360,9 +1355,6 @@ typedef struct pm_block_node {
 
     /** BlockNode#closing_loc */
     pm_location_t closing_loc;
-
-    /** BlockNode#numbered_parameters */
-    uint32_t numbered_parameters;
 } pm_block_node_t;
 
 /**
@@ -1484,9 +1476,6 @@ typedef struct pm_call_node {
     /** CallNode#call_operator_loc */
     pm_location_t call_operator_loc;
 
-    /** CallNode#name */
-    pm_constant_id_t name;
-
     /** CallNode#message_loc */
     pm_location_t message_loc;
 
@@ -1501,6 +1490,9 @@ typedef struct pm_call_node {
 
     /** CallNode#block */
     struct pm_node *block;
+
+    /** CallNode#name */
+    pm_constant_id_t name;
 } pm_call_node_t;
 
 /**
@@ -2616,18 +2608,6 @@ typedef struct pm_implicit_node {
 } pm_implicit_node_t;
 
 /**
- * ImplicitRestNode
- *
- * Type: PM_IMPLICIT_REST_NODE
- *
- * @extends pm_node_t
- */
-typedef struct pm_implicit_rest_node {
-    /** The embedded base node. */
-    pm_node_t base;
-} pm_implicit_rest_node_t;
-
-/**
  * InNode
  *
  * Type: PM_IN_NODE
@@ -3104,9 +3084,6 @@ typedef struct pm_lambda_node {
 
     /** LambdaNode#body */
     struct pm_node *body;
-
-    /** LambdaNode#numbered_parameters */
-    uint32_t numbered_parameters;
 } pm_lambda_node_t;
 
 /**
@@ -3598,7 +3575,7 @@ typedef struct pm_parameters_node {
     struct pm_node_list optionals;
 
     /** ParametersNode#rest */
-    struct pm_node *rest;
+    struct pm_rest_parameter_node *rest;
 
     /** ParametersNode#posts */
     struct pm_node_list posts;
@@ -4337,16 +4314,8 @@ typedef struct pm_yield_node {
  */
 typedef enum pm_arguments_node_flags {
     /** if arguments contain keyword splat */
-    PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORD_SPLAT = 1,
+    PM_ARGUMENTS_NODE_FLAGS_KEYWORD_SPLAT = 1,
 } pm_arguments_node_flags_t;
-
-/**
- * Flags for array nodes.
- */
-typedef enum pm_array_node_flags {
-    /** if array contains splat nodes */
-    PM_ARRAY_NODE_FLAGS_CONTAINS_SPLAT = 1,
-} pm_array_node_flags_t;
 
 /**
  * Flags for call nodes.

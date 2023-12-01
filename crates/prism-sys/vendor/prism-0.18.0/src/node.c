@@ -573,10 +573,6 @@ pm_node_destroy(pm_parser_t *parser, pm_node_t *node) {
             break;
         }
 #line 58 "node.c.erb"
-        case PM_IMPLICIT_REST_NODE: {
-            break;
-        }
-#line 58 "node.c.erb"
         case PM_IN_NODE: {
             pm_in_node_t *cast = (pm_in_node_t *) node;
             pm_node_destroy(parser, (pm_node_t *)cast->pattern);
@@ -1748,12 +1744,6 @@ pm_node_memsize_node(pm_node_t *node, pm_memsize_t *memsize) {
             break;
         }
 #line 103 "node.c.erb"
-        case PM_IMPLICIT_REST_NODE: {
-            pm_implicit_rest_node_t *cast = (pm_implicit_rest_node_t *) node;
-            memsize->memsize += sizeof(*cast);
-            break;
-        }
-#line 103 "node.c.erb"
         case PM_IN_NODE: {
             pm_in_node_t *cast = (pm_in_node_t *) node;
             memsize->memsize += sizeof(*cast);
@@ -2577,8 +2567,6 @@ pm_node_type_to_str(pm_node_type_t node_type)
             return "PM_IMAGINARY_NODE";
         case PM_IMPLICIT_NODE:
             return "PM_IMPLICIT_NODE";
-        case PM_IMPLICIT_REST_NODE:
-            return "PM_IMPLICIT_REST_NODE";
         case PM_IN_NODE:
             return "PM_IN_NODE";
         case PM_INDEX_AND_WRITE_NODE:
