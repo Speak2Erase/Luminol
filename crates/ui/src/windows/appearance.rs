@@ -83,9 +83,8 @@ impl luminol_core::Window for Window {
                         def bar(baz) 
                         end
                         print 1, 2.0
-                        puts [0x3, :4, '5']
+                        puts [0x3, :abc, '5']
                         "#,
-                    "rb",
                 ));
             });
 

@@ -176,7 +176,6 @@ impl luminol_core::Tab for ScriptTab {
                 ui.ctx(),
                 update_state.global_config.theme,
                 string,
-                "rb",
             );
             layout_job.wrap.max_width = wrap_width;
             ui.fonts(|f| f.layout_job(layout_job))
