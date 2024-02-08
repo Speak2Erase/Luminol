@@ -991,6 +991,7 @@ impl ScissorRect {
 }
 
 #[test]
+#[cfg(not(target_arch = "wasm32"))]
 fn renderer_impl_send_sync() {
     fn assert_send_sync<T: Send + Sync>() {}
     assert_send_sync::<Renderer>();

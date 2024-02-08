@@ -47,12 +47,12 @@ pub enum Data {
         scripts: RefCell<rpg::Scripts>,
         skills: RefCell<rpg::Skills>,
         states: RefCell<rpg::States>,
-        system: RefCell<rpg::System>,
+        system: RefCell<rpg::CSystem>,
         tilesets: RefCell<rpg::Tilesets>,
         troops: RefCell<rpg::Troops>,
         weapons: RefCell<rpg::Weapons>,
 
-        maps: RefCell<HashMap<usize, rpg::Map>>,
+        maps: RefCell<HashMap<usize, rpg::CMap>>,
     },
 }
 
@@ -114,32 +114,39 @@ fn write_nil_padded(
 
 macro_rules! load {
     ($fs:ident, $type:ident) => {
-        RefCell::new(rpg::$type {
-            data: read_nil_padded($fs, format!("{}.rxdata", stringify!($type)))
+        RefCell::new(rpg::$type::new(
+            read_nil_padded($fs, format!("{}.rxdata", stringify!($type)))
                 .wrap_err_with(|| format!("While reading {}.rxdata", stringify!($type)))?,
-            ..Default::default()
-        })
+        ))
     };
 }
+
 macro_rules! from_defaults {
     ($parent:ident, $child:ident) => {
-        RefCell::new(rpg::$parent {
-            data: vec![rpg::$child::default()],
-            ..Default::default()
-        })
+        RefCell::new(rpg::$parent::new(vec![rpg::$child::default()]))
     };
 }
 
 macro_rules! save {
     ($fs:ident, $type:ident, $field:ident) => {{
-        let borrowed = $field.borrow();
-        if borrowed.modified {
-            write_nil_padded(&borrowed.data, $fs, format!("{}.rxdata", stringify!($type)))
+        let borrowed = $field.get_mut();
+        let modified = borrowed.modified();
+        if modified {
+            write_nil_padded(&borrowed, $fs, format!("{}.rxdata", stringify!($type)))
                 .wrap_err_with(|| format!("While saving {}.rxdata", stringify!($type)))?;
+            borrowed.reset_modified();
         }
-        borrowed.modified
+        modified
     }};
 }
+
+macro_rules! is_modified {
+    ($field:ident) => {{
+        let borrowed = $field.borrow();
+        borrowed.modified()
+    }};
+}
+
 impl Data {
     /// Load all data required when opening a project.
     /// Does not load config. That is expected to have been loaded beforehand.
@@ -148,17 +155,15 @@ impl Data {
         filesystem: &impl luminol_filesystem::FileSystem,
         config: &mut luminol_config::project::Config,
     ) -> color_eyre::Result<()> {
-        let map_infos = RefCell::new(rpg::MapInfos {
-            data: read_data(filesystem, "MapInfos.rxdata")
-                .wrap_err("While reading MapInfos.rxdata")?,
-            ..Default::default()
-        });
+        let map_infos = RefCell::new(rpg::MapInfos::new(
+            read_data(filesystem, "MapInfos.rxdata").wrap_err("While reading MapInfos.rxdata")?,
+        ));
 
         let mut system = read_data::<rpg::System>(filesystem, "System.rxdata")
             .wrap_err("While reading System.rxdata")?;
         system.magic_number = rand::random();
 
-        let system = RefCell::new(system);
+        let system = RefCell::new(rpg::CSystem::new(system));
 
         let mut scripts = None;
         let scripts_paths = [
@@ -171,10 +176,7 @@ impl Data {
             match read_data(filesystem, format!("{script_path}.rxdata")) {
                 Ok(s) => {
                     config.project.scripts_path = script_path;
-                    scripts = Some(rpg::Scripts {
-                        data: s,
-                        ..Default::default()
-                    });
+                    scripts = Some(rpg::Scripts::new(s));
                     break;
                 }
                 Err(e) => eprintln!("error loading scripts from {script_path}: {e}"),
@@ -219,25 +221,19 @@ impl Data {
     pub fn from_defaults() -> Self {
         let mut map_infos = std::collections::HashMap::with_capacity(16);
         map_infos.insert(1, rpg::MapInfo::default());
-        let map_infos = RefCell::new(rpg::MapInfos {
-            data: map_infos,
-            ..Default::default()
-        });
+        let map_infos = RefCell::new(rpg::MapInfos::new(map_infos));
 
         let system = rpg::System {
             magic_number: rand::random(),
             ..Default::default()
         };
-        let system = RefCell::new(system);
+        let system = RefCell::new(rpg::CSystem::new(system));
 
         let scripts = vec![]; // FIXME legality of providing defualt scripts is unclear
-        let scripts = RefCell::new(rpg::Scripts {
-            data: scripts,
-            ..Default::default()
-        });
+        let scripts = RefCell::new(rpg::Scripts::new(scripts));
 
         let mut maps = std::collections::HashMap::with_capacity(32);
-        maps.insert(1, rpg::Map::default());
+        maps.insert(1, rpg::CMap::default());
         let maps = RefCell::new(maps);
 
         Self::Loaded {
@@ -293,83 +289,105 @@ impl Data {
             panic!("project not loaded")
         };
 
-        let mut modified = false;
+        let mut any_modified = false;
 
-        modified |= save!(filesystem, Actors, actors);
-        modified |= save!(filesystem, Animations, animations);
-        modified |= save!(filesystem, Armors, armors);
-        modified |= save!(filesystem, Classes, classes);
-        modified |= save!(filesystem, CommonEvents, common_events);
-        modified |= save!(filesystem, Enemies, enemies);
-        modified |= save!(filesystem, Items, items);
-        modified |= save!(filesystem, Skills, skills);
-        modified |= save!(filesystem, States, states);
-        modified |= save!(filesystem, Tilesets, tilesets);
-        modified |= save!(filesystem, Troops, troops);
-        modified |= save!(filesystem, Weapons, weapons);
+        any_modified |= save!(filesystem, Actors, actors);
+        any_modified |= save!(filesystem, Animations, animations);
+        any_modified |= save!(filesystem, Armors, armors);
+        any_modified |= save!(filesystem, Classes, classes);
+        any_modified |= save!(filesystem, CommonEvents, common_events);
+        any_modified |= save!(filesystem, Enemies, enemies);
+        any_modified |= save!(filesystem, Items, items);
+        any_modified |= save!(filesystem, Skills, skills);
+        any_modified |= save!(filesystem, States, states);
+        any_modified |= save!(filesystem, Tilesets, tilesets);
+        any_modified |= save!(filesystem, Troops, troops);
+        any_modified |= save!(filesystem, Weapons, weapons);
 
-        {
-            let map_infos = map_infos.borrow();
-            if map_infos.modified {
-                modified = true;
-                write_data(&map_infos.data, filesystem, "MapInfos.rxdata")
-                    .wrap_err("While saving MapInfos.rxdata")?;
+        let map_infos = map_infos.borrow();
+        if map_infos.modified() {
+            any_modified = true;
+            write_data(map_infos.data(), filesystem, "MapInfos.rxdata")
+                .wrap_err("While saving MapInfos.rxdata")?;
+        }
+
+        let scripts = scripts.get_mut();
+        if scripts.modified() {
+            any_modified = true;
+            write_data(
+                scripts.data(),
+                filesystem,
+                format!("{}.rxdata", config.project.scripts_path),
+            )?;
+            scripts.reset_modified();
+        }
+
+        let maps = maps.get_mut();
+        maps.iter_mut().try_for_each(|(id, map)| {
+            if map.modified() {
+                any_modified = true;
+                map.reset_modified();
+                write_data(map.data(), filesystem, format!("Map{id:0>3}.rxdata"))
+                    .wrap_err_with(|| format!("While saving map {id:0>3}"))
+            } else {
+                Ok(())
             }
+        })?;
+
+        let system = system.get_mut();
+        if system.modified() || any_modified {
+            system.bypass_change_detection().magic_number = rand::random();
+            write_data(system.data(), filesystem, "System.rxdata")
+                .wrap_err("While saving System.rxdata")?;
+            system.reset_modified();
         }
 
-        {
-            let scripts = scripts.borrow();
-            if scripts.modified {
-                modified = true;
-                write_data(
-                    &scripts.data,
-                    filesystem,
-                    format!("{}.rxdata", config.project.scripts_path),
-                )?;
-            }
-        }
-
-        {
-            let maps = maps.borrow();
-            maps.iter().try_for_each(|(id, map)| {
-                if map.modified {
-                    modified = true;
-                    write_data(map, filesystem, format!("Map{id:0>3}.rxdata"))
-                        .wrap_err_with(|| format!("While saving map {id:0>3}"))
-                } else {
-                    Ok(())
-                }
-            })?
-        }
-
-        {
-            let system = system.get_mut();
-            if system.modified || modified {
-                system.magic_number = rand::random();
-                write_data(system, filesystem, "System.rxdata")
-                    .wrap_err("While saving System.rxdata")?;
-                system.modified = false;
-            }
-        }
-
-        actors.borrow_mut().modified = false;
-        animations.borrow_mut().modified = false;
-        armors.borrow_mut().modified = false;
-        classes.borrow_mut().modified = false;
-        common_events.borrow_mut().modified = false;
-        enemies.borrow_mut().modified = false;
-        items.borrow_mut().modified = false;
-        skills.borrow_mut().modified = false;
-        states.borrow_mut().modified = false;
-        tilesets.borrow_mut().modified = false;
-        troops.borrow_mut().modified = false;
-        weapons.borrow_mut().modified = false;
-        map_infos.borrow_mut().modified = false;
-        scripts.borrow_mut().modified = false;
-        for (_, map) in maps.borrow_mut().iter_mut() {
-            map.modified = false;
-        }
         Ok(())
+    }
+
+    pub fn any_modified(&self) -> bool {
+        let Self::Loaded {
+            actors,
+            animations,
+            armors,
+            classes,
+            common_events,
+            enemies,
+            items,
+            map_infos,
+            scripts,
+            skills,
+            states,
+            tilesets,
+            troops,
+            weapons,
+            system,
+            maps,
+        } = self
+        else {
+            return false;
+        };
+
+        let mut any_modified = false;
+        any_modified |= is_modified!(actors);
+        any_modified |= is_modified!(animations);
+        any_modified |= is_modified!(armors);
+        any_modified |= is_modified!(classes);
+        any_modified |= is_modified!(common_events);
+        any_modified |= is_modified!(enemies);
+        any_modified |= is_modified!(items);
+        any_modified |= is_modified!(scripts);
+        any_modified |= is_modified!(skills);
+        any_modified |= is_modified!(map_infos);
+        any_modified |= is_modified!(states);
+        any_modified |= is_modified!(tilesets);
+        any_modified |= is_modified!(troops);
+        any_modified |= is_modified!(weapons);
+        any_modified |= is_modified!(system);
+
+        any_modified |= maps.borrow().values().any(rpg::CMap::modified);
+
+        any_modified
     }
 }
 
@@ -401,10 +419,17 @@ impl Data {
         rpg::Scripts, scripts,
         rpg::Skills, skills,
         rpg::States, states,
-        rpg::System, system,
         rpg::Tilesets, tilesets,
         rpg::Troops, troops,
         rpg::Weapons, weapons,
+    }
+
+    #[allow(unsafe_code, dead_code)]
+    pub fn system(&self) -> RefMut<'_, rpg::CSystem> {
+        match self {
+            Self::Unloaded => panic!("data cache unloaded"),
+            Self::Loaded { system, .. } => system.borrow_mut(),
+        }
     }
 
     /// Load a map.
@@ -413,7 +438,7 @@ impl Data {
         &self,
         id: usize,
         filesystem: &impl luminol_filesystem::FileSystem,
-    ) -> RefMut<'_, rpg::Map> {
+    ) -> RefMut<'_, rpg::CMap> {
         let maps_ref = match self {
             Self::Loaded { maps, .. } => maps.borrow_mut(),
             Self::Unloaded => panic!("project not loaded"),
@@ -421,12 +446,14 @@ impl Data {
         RefMut::map(maps_ref, |maps| {
             // FIXME
             maps.entry(id).or_insert_with(|| {
-                read_data(filesystem, format!("Map{id:0>3}.rxdata")).expect("failed to load map")
+                let map = read_data(filesystem, format!("Map{id:0>3}.rxdata"))
+                    .expect("failed to load map");
+                rpg::CMap::new(map)
             })
         })
     }
 
-    pub fn get_map(&self, id: usize) -> RefMut<'_, rpg::Map> {
+    pub fn get_map(&self, id: usize) -> RefMut<'_, rpg::CMap> {
         let maps_ref = match self {
             Self::Loaded { maps, .. } => maps.borrow_mut(),
             Self::Unloaded => panic!("project not loaded"),

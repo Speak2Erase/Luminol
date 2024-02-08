@@ -351,7 +351,6 @@ impl TopBar {
             if let Some(config) = update_state.project_config {
                 match update_state.data.save(update_state.filesystem, config) {
                     Ok(_) => {
-                        update_state.modified.set(false);
                         luminol_core::info!(update_state.toasts, "Saved project successfully!");
                     }
                     Err(e) => luminol_core::error!(update_state.toasts, e),

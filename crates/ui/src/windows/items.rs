@@ -83,12 +83,8 @@ impl luminol_core::Window for Window {
         let system = update_state.data.system();
         let states = update_state.data.states();
 
-        self.selected_item = self.selected_item.min(items.data.len().saturating_sub(1));
-        self.selected_item_name = items
-            .data
-            .get(self.selected_item)
-            .map(|item| item.name.clone());
-        let mut modified = false;
+        self.selected_item = self.selected_item.min(items.len().saturating_sub(1));
+        self.selected_item_name = items.get(self.selected_item).map(|item| item.name.clone());
 
         egui::Window::new(self.name())
             .id(egui::Id::new("item_editor"))
@@ -116,11 +112,11 @@ impl luminol_core::Window for Window {
                                         - button_height
                                         - ui.spacing().item_spacing.y,
                                 )
-                                .show_rows(ui, button_height, items.data.len(), |ui, rows| {
+                                .show_rows(ui, button_height, items.len(), |ui, rows| {
                                     ui.set_width(ui.available_width());
 
                                     let offset = rows.start;
-                                    for (id, item) in items.data[rows].iter_mut().enumerate() {
+                                    for (id, item) in items[rows].iter_mut().enumerate() {
                                         let id = id + offset;
 
                                         ui.with_stripe(id % 2 != 0, |ui| {
@@ -147,7 +143,6 @@ impl luminol_core::Window for Window {
                                                 })
                                             {
                                                 *item = Default::default();
-                                                modified = true;
                                             }
                                         });
                                     }
@@ -175,29 +170,27 @@ impl luminol_core::Window for Window {
                                     + 3. * ui.spacing().item_spacing.x,
                             );
 
-                            let Some(selected_item) = items.data.get_mut(self.selected_item) else {
+                            let Some(selected_item) = items.get_mut(self.selected_item) else {
                                 return;
                             };
 
-                            modified |= ui
-                                .add(luminol_components::Field::new(
-                                    "Name",
-                                    egui::TextEdit::singleline(&mut selected_item.name)
-                                        .desired_width(f32::INFINITY),
-                                ))
-                                .changed();
+                            ui.add(luminol_components::Field::new(
+                                "Name",
+                                egui::TextEdit::singleline(&mut selected_item.name)
+                                    .desired_width(f32::INFINITY),
+                            ))
+                            .changed();
 
-                            modified |= ui
-                                .add(luminol_components::Field::new(
-                                    "Description",
-                                    egui::TextEdit::multiline(&mut selected_item.description)
-                                        .desired_width(f32::INFINITY),
-                                ))
-                                .changed();
+                            ui.add(luminol_components::Field::new(
+                                "Description",
+                                egui::TextEdit::multiline(&mut selected_item.description)
+                                    .desired_width(f32::INFINITY),
+                            ))
+                            .changed();
 
                             ui.with_stripe(true, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Scope",
                                             luminol_components::EnumComboBox::new(
@@ -207,7 +200,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Occasion",
                                             luminol_components::EnumComboBox::new(
@@ -221,15 +214,15 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(false, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "User Animation",
                                             luminol_components::OptionalIdComboBox::new(
                                                 (selected_item.id, "animation1_id"),
                                                 &mut selected_item.animation1_id,
-                                                animations.data.len(),
+                                                animations.len(),
                                                 |id| {
-                                                    animations.data.get(id).map_or_else(
+                                                    animations.get(id).map_or_else(
                                                         || "".into(),
                                                         |a| format!("{id:0>3}: {}", a.name),
                                                     )
@@ -238,15 +231,15 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Target Animation",
                                             luminol_components::OptionalIdComboBox::new(
                                                 (selected_item.id, "animation2_id"),
                                                 &mut selected_item.animation2_id,
-                                                animations.data.len(),
+                                                animations.len(),
                                                 |id| {
-                                                    animations.data.get(id).map_or_else(
+                                                    animations.get(id).map_or_else(
                                                         || "".into(),
                                                         |a| format!("{id:0>3}: {}", a.name),
                                                     )
@@ -259,22 +252,22 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(true, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Menu Use SE",
                                             egui::Label::new("TODO"),
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Common Event",
                                             luminol_components::OptionalIdComboBox::new(
                                                 (selected_item.id, "common_event_id"),
                                                 &mut selected_item.common_event_id,
-                                                common_events.data.len(),
+                                                common_events.len(),
                                                 |id| {
-                                                    common_events.data.get(id).map_or_else(
+                                                    common_events.get(id).map_or_else(
                                                         || "".into(),
                                                         |e| format!("{id:0>3}: {}", e.name),
                                                     )
@@ -287,7 +280,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(false, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Price",
                                             egui::DragValue::new(&mut selected_item.price)
@@ -295,7 +288,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Consumable",
                                             egui::Checkbox::without_text(
@@ -308,7 +301,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(true, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Parameter",
                                             luminol_components::EnumComboBox::new(
@@ -318,7 +311,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add_enabled(
                                             !matches!(
                                                 selected_item.parameter_type,
@@ -338,7 +331,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(false, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Recover HP Rate",
                                             egui::Slider::new(
@@ -349,7 +342,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Recover HP",
                                             egui::DragValue::new(&mut selected_item.recover_hp)
@@ -361,7 +354,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(true, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Recover SP Rate",
                                             egui::Slider::new(
@@ -372,7 +365,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Recover SP",
                                             egui::DragValue::new(&mut selected_item.recover_sp)
@@ -384,7 +377,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(false, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "Hit Rate",
                                             egui::Slider::new(&mut selected_item.hit, 0..=100)
@@ -392,7 +385,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "Variance",
                                             egui::Slider::new(&mut selected_item.variance, 0..=100)
@@ -404,7 +397,7 @@ impl luminol_core::Window for Window {
 
                             ui.with_stripe(true, |ui| {
                                 ui.columns(2, |columns| {
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new(
                                             "PDEF-F",
                                             egui::Slider::new(&mut selected_item.pdef_f, 0..=100)
@@ -412,7 +405,7 @@ impl luminol_core::Window for Window {
                                         ))
                                         .changed();
 
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "MDEF-F",
                                             egui::Slider::new(&mut selected_item.mdef_f, 0..=100)
@@ -438,7 +431,7 @@ impl luminol_core::Window for Window {
                                     if self.previous_selected_item != Some(selected_item.id) {
                                         selection.clear_search();
                                     }
-                                    modified |= columns[0]
+                                    columns[0]
                                         .add(luminol_components::Field::new("Elements", selection))
                                         .changed();
 
@@ -447,9 +440,9 @@ impl luminol_core::Window for Window {
                                             (selected_item.id, "state_set"),
                                             &mut selected_item.plus_state_set,
                                             &mut selected_item.minus_state_set,
-                                            states.data.len(),
+                                            states.len(),
                                             |id| {
-                                                states.data.get(id).map_or_else(
+                                                states.get(id).map_or_else(
                                                     || "".into(),
                                                     |s| format!("{id:0>3}: {}", s.name),
                                                 )
@@ -458,7 +451,7 @@ impl luminol_core::Window for Window {
                                     if self.previous_selected_item != Some(selected_item.id) {
                                         selection.clear_search();
                                     }
-                                    modified |= columns[1]
+                                    columns[1]
                                         .add(luminol_components::Field::new(
                                             "State Change",
                                             selection,
@@ -472,11 +465,6 @@ impl luminol_core::Window for Window {
             });
 
         self.previous_selected_item =
-            (self.selected_item < items.data.len()).then_some(self.selected_item);
-
-        if modified {
-            update_state.modified.set(true);
-            items.modified = true;
-        }
+            (self.selected_item < items.len()).then_some(self.selected_item);
     }
 }

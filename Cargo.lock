@@ -3039,6 +3039,7 @@ dependencies = [
  "luminol-audio",
  "luminol-config",
  "luminol-core",
+ "luminol-data",
  "luminol-eframe",
  "luminol-egui-wgpu",
  "luminol-filesystem",

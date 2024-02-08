@@ -36,10 +36,12 @@ impl Window {
         children_data: &BTreeMap<usize, BTreeSet<usize>>,
         mapinfos: &mut luminol_data::rpg::MapInfos,
         open_map_id: &mut Option<usize>,
+        modified: &mut bool,
         ui: &mut egui::Ui,
     ) {
         // We get the map name. It's assumed that there is in fact a map with this ID in mapinfos.
-        let map_info = mapinfos.data.get_mut(&id).unwrap();
+        // We also need to bypass change detection as editing mapinfos are a bit more involved.
+        let map_info = mapinfos.bypass_change_detection().get_mut(&id).unwrap();
 
         // Does this map have children?
         if children_data.contains_key(&id) {
@@ -56,23 +58,34 @@ impl Window {
             header
                 .show_header(ui, |ui| {
                     // Has the user
-                    if ui.text_edit_singleline(&mut map_info.name).double_clicked() {
+                    let response = ui.text_edit_singleline(&mut map_info.name);
+                    if response.double_clicked() {
                         *open_map_id = Some(id)
                     }
+                    *modified |= response.changed();
                 })
                 .body(|ui| {
                     for id in children_data.get(&id).unwrap() {
                         // Render children.
-                        Self::render_submap(*id, children_data, mapinfos, open_map_id, ui);
+                        Self::render_submap(
+                            *id,
+                            children_data,
+                            mapinfos,
+                            open_map_id,
+                            modified,
+                            ui,
+                        );
                     }
                 });
         } else {
             // Just display a label otherwise.
             ui.horizontal(|ui| {
                 ui.add_space(ui.spacing().indent);
-                if ui.text_edit_singleline(&mut map_info.name).double_clicked() {
+                let response = ui.text_edit_singleline(&mut map_info.name);
+                if response.double_clicked() {
                     *open_map_id = Some(id)
                 }
+                *modified |= response.changed();
             });
         }
     }
@@ -110,7 +123,7 @@ impl luminol_core::Window for Window {
                         // We preprocess maps to figure out what has nodes and what doesn't.
                         // This should result in an ordered hashmap of all the maps and their children.
                         let mut children_data: BTreeMap<_, BTreeSet<_>> = BTreeMap::new();
-                        for (&id, map) in mapinfos.data.iter() {
+                        for (&id, map) in mapinfos.iter() {
                             // Is there an entry for our parent?
                             // If not, then just add a blank vector to it.
                             let children = children_data.entry(map.parent_id).or_default(); // FIXME: this doesn't handle sorting properly
@@ -119,6 +132,7 @@ impl luminol_core::Window for Window {
                         children_data.entry(0).or_default(); // If there is no `0` entry (i.e. there are no maps) then add one.
 
                         let mut open_map_id = None;
+                        let mut modified = false;
 
                         // Now we can actually render all maps.
                         egui::CollapsingHeader::new("root")
@@ -132,10 +146,15 @@ impl luminol_core::Window for Window {
                                         &children_data,
                                         &mut mapinfos,
                                         &mut open_map_id,
+                                        &mut modified,
                                         ui,
                                     );
                                 }
                             });
+
+                        if modified {
+                            mapinfos.set_modified();
+                        }
 
                         drop(mapinfos);
 

@@ -43,6 +43,8 @@ pub struct App {
     audio: luminol_audio::Audio,
     #[cfg(target_arch = "wasm32")]
     audio: luminol_audio::AudioWrapper,
+    #[cfg(target_arch = "wasm32")]
+    data_cache_modified: Arc<std::sync::atomic::AtomicBool>,
 
     graphics: Arc<luminol_graphics::GraphicsState>,
     filesystem: luminol_filesystem::project::FileSystem,
@@ -57,9 +59,10 @@ pub struct App {
     global_config: luminol_config::global::Config,
     project_config: Option<luminol_config::project::Config>,
 
+    force_quit: Arc<std::sync::atomic::AtomicBool>,
+
     toolbar: luminol_core::ToolbarState,
 
-    modified: luminol_core::ModifiedState,
     project_manager: luminol_core::ProjectManager,
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -84,11 +87,11 @@ impl App {
     pub fn new(
         cc: &luminol_eframe::CreationContext<'_>,
         report: Option<String>,
-        modified: luminol_core::ModifiedState,
         #[cfg(not(target_arch = "wasm32"))] log_term_rx: luminol_term::TermReceiver,
         #[cfg(not(target_arch = "wasm32"))] log_byte_rx: luminol_term::ByteReceiver,
         #[cfg(not(target_arch = "wasm32"))] try_load_path: Option<std::ffi::OsString>,
         #[cfg(target_arch = "wasm32")] audio: luminol_audio::AudioWrapper,
+        #[cfg(target_arch = "wasm32")] data_cache_modified: Arc<std::sync::atomic::AtomicBool>,
         #[cfg(feature = "steamworks")] steamworks: Steamworks,
     ) -> Self {
         luminol_core::set_git_revision(crate::git_revision());
@@ -255,8 +258,11 @@ impl App {
             project_config,
             toolbar: luminol_core::ToolbarState::default(),
 
-            modified,
+            force_quit: Default::default(),
             project_manager: luminol_core::ProjectManager::new(&cc.egui_ctx),
+
+            #[cfg(target_arch = "wasm32")]
+            data_cache_modified,
 
             #[cfg(not(target_arch = "wasm32"))]
             _runtime: runtime,
@@ -312,9 +318,11 @@ impl luminol_eframe::App for App {
             project_config: &mut self.project_config,
             global_config: &mut self.global_config,
             toolbar: &mut self.toolbar,
-            modified: self.modified.clone(),
+            force_quit: self.force_quit.clone(),
             project_manager: &mut self.project_manager,
             git_revision: crate::git_revision(),
+            #[cfg(target_arch = "wasm32")]
+            data_cache_modified: self.data_cache_modified.clone(),
         };
 
         // If a file/folder picker is open, prevent the user from interacting with the application
@@ -397,7 +405,9 @@ impl luminol_eframe::App for App {
 
         // Call the exit handler if the user or the app requested to close the window.
         #[cfg(not(target_arch = "wasm32"))]
-        if ctx.input(|i| i.viewport().close_requested()) && self.modified.get() {
+        if ctx.input(|i| i.viewport().close_requested())
+            && !self.force_quit.load(std::sync::atomic::Ordering::Relaxed)
+        {
             self.project_manager.quit();
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
         }

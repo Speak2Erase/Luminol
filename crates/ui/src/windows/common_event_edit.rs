@@ -69,10 +69,9 @@ impl luminol_core::Window for Window {
                     egui::ScrollArea::both().auto_shrink([false; 2]).show_rows(
                         ui,
                         ui.text_style_height(&egui::TextStyle::Body),
-                        common_events.data.len(),
+                        common_events.len(),
                         |ui, rows| {
                             for (ele, event) in common_events
-                                .data
                                 .iter()
                                 .enumerate()
                                 .filter(|(ele, _)| rows.contains(ele))
@@ -167,7 +166,7 @@ impl luminol_core::Tab for CommonEventTab {
             if save_event {
                 let mut common_events = update_state.data.common_events();
 
-                common_events.data[self.event.id - 1] = self.event.clone();
+                common_events[self.event.id - 1] = self.event.clone();
             }
 
             ui.label("Name");

@@ -32,7 +32,7 @@ impl super::Tab {
         map_y: usize,
         tile_layer: usize,
         pencil: luminol_core::Pencil,
-        map: &mut luminol_data::rpg::Map,
+        map: &mut luminol_data::rpg::CMap,
     ) {
         let map_pos = egui::pos2(map_x as f32, map_y as f32);
         let initial_tile =

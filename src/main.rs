@@ -330,7 +330,6 @@ fn main() {
             Box::new(app::App::new(
                 cc,
                 report,
-                Default::default(),
                 log_term_rx,
                 log_byte_rx,
                 std::env::args_os().nth(1),
@@ -358,7 +357,7 @@ const CANVAS_ID: &str = "luminol-canvas";
 struct WorkerData {
     report: Option<String>,
     audio: luminol_audio::AudioWrapper,
-    modified: luminol_core::ModifiedState,
+    data_cache_modified: std::sync::Arc<std::sync::atomic::AtomicBool>,
     prefers_color_scheme_dark: Option<bool>,
     fs_worker_channels: luminol_filesystem::web::WorkerChannels,
     runner_worker_channels: luminol_eframe::web::WorkerChannels,
@@ -481,12 +480,12 @@ pub fn luminol_main_start() {
         })
         .expect("unable to setup web runner main thread hooks");
 
-    let modified = luminol_core::ModifiedState::default();
+    let data_cache_modified = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
 
     *WORKER_DATA.lock() = Some(WorkerData {
         report,
         audio: luminol_audio::Audio::default().into(),
-        modified: modified.clone(),
+        data_cache_modified: data_cache_modified.clone(),
         prefers_color_scheme_dark,
         fs_worker_channels,
         runner_worker_channels,
@@ -497,7 +496,7 @@ pub fn luminol_main_start() {
     // unsaved changes in the current project
     {
         let closure: Closure<dyn Fn(_)> = Closure::new(move |e: web_sys::BeforeUnloadEvent| {
-            if modified.get() {
+            if data_cache_modified.load(std::sync::atomic::Ordering::Relaxed) {
                 // Recommended method of activating the confirmation dialogue
                 e.prevent_default();
                 // Fallback for Chromium < 119
@@ -533,7 +532,7 @@ pub async fn luminol_worker_start(canvas: web_sys::OffscreenCanvas) {
     let WorkerData {
         report,
         audio,
-        modified,
+        data_cache_modified,
         prefers_color_scheme_dark,
         fs_worker_channels,
         runner_worker_channels,
@@ -548,7 +547,7 @@ pub async fn luminol_worker_start(canvas: web_sys::OffscreenCanvas) {
         .start(
             canvas,
             web_options,
-            Box::new(|cc| Box::new(app::App::new(cc, report, modified, audio))),
+            Box::new(|cc| Box::new(app::App::new(cc, report, audio, data_cache_modified))),
             luminol_eframe::web::WorkerOptions {
                 prefers_color_scheme_dark,
                 channels: runner_worker_channels,

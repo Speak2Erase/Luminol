@@ -93,7 +93,9 @@ impl ProjectManager {
     pub fn quit(&mut self) {
         self.run_custom(|update_state| {
             // Disable the modified flag so `luminol_eframe::App::on_close_event` doesn't recurse
-            update_state.modified.set(false);
+            update_state
+                .force_quit
+                .store(true, std::sync::atomic::Ordering::Relaxed);
 
             update_state
                 .ctx

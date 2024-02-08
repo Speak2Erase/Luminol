@@ -144,7 +144,7 @@ impl super::Tab {
 
     pub(super) fn set_tile(
         &self,
-        map: &mut luminol_data::rpg::Map,
+        map: &mut luminol_data::rpg::CMap,
         tile: luminol_components::SelectedTile,
         position: (usize, usize, usize),
     ) {
@@ -178,7 +178,7 @@ impl super::Tab {
         }
     }
 
-    pub(super) fn add_event(&mut self, map: &mut luminol_data::rpg::Map) -> Option<usize> {
+    pub(super) fn add_event(&mut self, map: &mut luminol_data::rpg::CMap) -> Option<usize> {
         let mut first_vacant_id = 1;
         let mut max_event_id = 0;
 
@@ -225,12 +225,10 @@ impl super::Tab {
 
     pub(super) fn push_to_history(
         &mut self,
-        update_state: &luminol_core::UpdateState<'_>,
-        map: &mut luminol_data::rpg::Map,
+        map: &mut luminol_data::rpg::CMap,
         entry: super::HistoryEntry,
     ) {
-        update_state.modified.set(true);
-        map.modified = true;
+        map.set_modified();
         self.redo_history.clear();
         if self.history.len() == super::HISTORY_SIZE {
             self.history.pop_front();

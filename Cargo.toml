@@ -167,6 +167,7 @@ luminol-config.workspace = true
 luminol-filesystem.workspace = true
 luminol-graphics.workspace = true
 luminol-ui.workspace = true
+luminol-data.workspace = true
 # luminol-windows = { version = "0.1.0", path = "../windows/" }
 # luminol-tabs = { version = "0.1.0", path = "../tabs/" }
 
@@ -235,6 +236,7 @@ features = ["webgpu", "webgl"]
 
 [features]
 steamworks = ["dep:steamworks"]
+debug-modification-locations = ["luminol-data/debug-modification-locations"]
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"

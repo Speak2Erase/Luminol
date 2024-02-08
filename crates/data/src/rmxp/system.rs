@@ -68,9 +68,6 @@ pub struct System {
     pub battler_name: Path,
     pub battler_hue: i32,
     pub edit_map_id: usize,
-
-    #[serde(skip)]
-    pub modified: bool,
 }
 
 #[derive(Default, Debug, serde::Deserialize, serde::Serialize)]

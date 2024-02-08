@@ -76,47 +76,14 @@ pub struct UpdateState<'res> {
 
     pub toolbar: &'res mut ToolbarState,
 
-    pub modified: ModifiedState,
     pub project_manager: &'res mut ProjectManager,
 
     pub git_revision: &'static str,
-}
 
-/// This stores whether or not there are unsaved changes in any file in the current project and is
-/// used to determine whether we should show a "you have unsaved changes" modal when the user tries
-/// to close the current project or the application window.
-///
-/// This must be thread-safe in wasm because the `beforeunload` event handler resides on the main
-/// thread but state is written to from the worker thread.
-#[derive(Debug, Default, Clone)]
-pub struct ModifiedState {
-    #[cfg(not(target_arch = "wasm32"))]
-    modified: std::rc::Rc<std::cell::Cell<bool>>,
+    pub force_quit: Arc<std::sync::atomic::AtomicBool>,
+    // used for communication with web worker
     #[cfg(target_arch = "wasm32")]
-    modified: Arc<std::sync::atomic::AtomicBool>,
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl ModifiedState {
-    pub fn get(&self) -> bool {
-        self.modified.get()
-    }
-
-    pub fn set(&self, val: bool) {
-        self.modified.set(val);
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-impl ModifiedState {
-    pub fn get(&self) -> bool {
-        self.modified.load(std::sync::atomic::Ordering::Relaxed)
-    }
-
-    pub fn set(&self, val: bool) {
-        self.modified
-            .store(val, std::sync::atomic::Ordering::Relaxed);
-    }
+    pub data_cache_modified: Arc<std::sync::atomic::AtomicBool>,
 }
 
 #[allow(missing_docs)]
@@ -154,9 +121,11 @@ impl<'res> UpdateState<'res> {
             project_config: self.project_config,
             global_config: self.global_config,
             toolbar: self.toolbar,
-            modified: self.modified.clone(),
             project_manager: self.project_manager,
             git_revision: self.git_revision,
+            force_quit: self.force_quit.clone(),
+            #[cfg(target_arch = "wasm32")]
+            data_cache_modified: self.data_cache_modified.clone(),
         }
     }
 
@@ -177,9 +146,11 @@ impl<'res> UpdateState<'res> {
             project_config: self.project_config,
             global_config: self.global_config,
             toolbar: self.toolbar,
-            modified: self.modified.clone(),
             project_manager: self.project_manager,
             git_revision: self.git_revision,
+            force_quit: self.force_quit.clone(),
+            #[cfg(target_arch = "wasm32")]
+            data_cache_modified: self.data_cache_modified.clone(),
         }
     }
 
@@ -189,8 +160,15 @@ impl<'res> UpdateState<'res> {
         let mut should_run_closure = false;
         let mut should_focus_save_button = false;
 
+        let data_cache_modified = self.data.any_modified();
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.data_cache_modified
+                .store(data_cache_modified, std::sync::atomic::Ordering::Relaxed);
+        }
+
         if self.project_manager.closure.is_some() {
-            if !self.modified.get() {
+            if !data_cache_modified {
                 should_close = true;
                 should_run_closure = true;
             } else if show_modal && !self.project_manager.modal.is_open() {
@@ -241,7 +219,6 @@ impl<'res> UpdateState<'res> {
                     .save(self.filesystem, self.project_config.as_ref().unwrap())
                 {
                     Ok(_) => {
-                        self.modified.set(false);
                         info!(self.toasts, "Saved project successfully!");
                     }
                     Err(e) => {
@@ -378,6 +355,5 @@ impl<'res> UpdateState<'res> {
         self.filesystem.unload_project();
         *self.project_config = None;
         self.data.unload();
-        self.modified.set(false);
     }
 }

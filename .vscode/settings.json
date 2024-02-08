@@ -5,6 +5,7 @@
 	"licenser.customHeaderFile": "${workspaceFolder}/.vscode/header.txt",
 	"licenser.disableAutoHeaderInsertion": false,
 	"rust-analyzer.cargo.features": [
+		"debug-modification-locations"
 		// "steamworks"
 	],
 	"editor.formatOnSave": true,
