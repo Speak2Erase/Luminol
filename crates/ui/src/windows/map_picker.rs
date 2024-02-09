@@ -22,27 +22,27 @@
 // terms of the Steamworks API by Valve Corporation, the licensors of this
 // Program grant you additional permission to convey the resulting work.
 
-use std::collections::{BTreeMap, BTreeSet};
-
 /// The map picker window.
 /// Displays a list of maps in a tree.
 /// Maps can be double clicked to open them in a map editor.
 #[derive(Default)]
 pub struct Window {}
 
+// FIXME use a better iterator instead
 impl Window {
     fn render_submap(
-        id: usize,
-        children_data: &BTreeMap<usize, BTreeSet<usize>>,
+        id: indextree::NodeId,
         mapinfos: &mut luminol_data::rpg::MapInfos,
         open_map_id: &mut Option<usize>,
         ui: &mut egui::Ui,
     ) {
-        // We get the map name. It's assumed that there is in fact a map with this ID in mapinfos.
-        let map_info = mapinfos.data.get_mut(&id).unwrap();
-
+        let has_children = id.children(&mapinfos.arena).next().is_some();
         // Does this map have children?
-        if children_data.contains_key(&id) {
+        if has_children {
+            // We get the map name. It's assumed that there is in fact a map with this ID in mapinfos.
+            let map_info_node = mapinfos.arena.get_mut(id).unwrap();
+            let map_info = map_info_node.get_mut();
+
             // Render a custom collapsing header.
             // It's custom so we can add a button to open a map.
             let header = egui::collapsing_header::CollapsingState::load_with_default_open(
@@ -57,21 +57,24 @@ impl Window {
                 .show_header(ui, |ui| {
                     // Has the user
                     if ui.text_edit_singleline(&mut map_info.name).double_clicked() {
-                        *open_map_id = Some(id)
+                        *open_map_id = Some(map_info.map_id)
                     }
                 })
                 .body(|ui| {
-                    for id in children_data.get(&id).unwrap() {
+                    for id in id.children(&mapinfos.arena).collect::<Vec<_>>() {
                         // Render children.
-                        Self::render_submap(*id, children_data, mapinfos, open_map_id, ui);
+                        Self::render_submap(id, mapinfos, open_map_id, ui);
                     }
                 });
         } else {
             // Just display a label otherwise.
             ui.horizontal(|ui| {
+                let map_info_node = mapinfos.arena.get_mut(id).unwrap();
+                let map_info = map_info_node.get_mut();
+
                 ui.add_space(ui.spacing().indent);
                 if ui.text_edit_singleline(&mut map_info.name).double_clicked() {
-                    *open_map_id = Some(id)
+                    *open_map_id = Some(map_info.map_id)
                 }
             });
         }
@@ -107,33 +110,19 @@ impl luminol_core::Window for Window {
                         // Aquire the data cache.
                         let mut mapinfos = update_state.data.map_infos();
 
-                        // We preprocess maps to figure out what has nodes and what doesn't.
-                        // This should result in an ordered hashmap of all the maps and their children.
-                        let mut children_data: BTreeMap<_, BTreeSet<_>> = BTreeMap::new();
-                        for (&id, map) in mapinfos.data.iter() {
-                            // Is there an entry for our parent?
-                            // If not, then just add a blank vector to it.
-                            let children = children_data.entry(map.parent_id).or_default(); // FIXME: this doesn't handle sorting properly
-                            children.insert(id);
-                        }
-                        children_data.entry(0).or_default(); // If there is no `0` entry (i.e. there are no maps) then add one.
-
                         let mut open_map_id = None;
 
                         // Now we can actually render all maps.
                         egui::CollapsingHeader::new("root")
                             .default_open(true)
                             .show(ui, |ui| {
-                                // There will always be a map `0`.
-                                // `0` is assumed to be the root map.
-                                for &id in children_data.get(&0).unwrap() {
-                                    Self::render_submap(
-                                        id,
-                                        &children_data,
-                                        &mut mapinfos,
-                                        &mut open_map_id,
-                                        ui,
-                                    );
+                                // borrow checker stuff
+                                let iter = mapinfos
+                                    .root_id
+                                    .children(&mapinfos.arena)
+                                    .collect::<Vec<_>>();
+                                for id in iter {
+                                    Self::render_submap(id, &mut mapinfos, &mut open_map_id, ui);
                                 }
                             });
 

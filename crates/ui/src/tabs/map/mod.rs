@@ -172,7 +172,8 @@ impl luminol_core::Tab for Tab {
                 ""
             },
             self.id,
-            map_infos.data[&self.id].name,
+            // TODO
+            "dhgsvfkds",
         )
     }
 

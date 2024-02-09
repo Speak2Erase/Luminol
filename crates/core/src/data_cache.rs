@@ -148,11 +148,9 @@ impl Data {
         filesystem: &impl luminol_filesystem::FileSystem,
         config: &mut luminol_config::project::Config,
     ) -> color_eyre::Result<()> {
-        let map_infos = RefCell::new(rpg::MapInfos {
-            data: read_data(filesystem, "MapInfos.rxdata")
-                .wrap_err("While reading MapInfos.rxdata")?,
-            ..Default::default()
-        });
+        let map_infos = RefCell::new(
+            read_data(filesystem, "MapInfos.rxdata").wrap_err("While reading MapInfos.rxdata")?,
+        );
 
         let mut system = read_data::<rpg::System>(filesystem, "System.rxdata")
             .wrap_err("While reading System.rxdata")?;
@@ -217,12 +215,7 @@ impl Data {
     }
 
     pub fn from_defaults() -> Self {
-        let mut map_infos = std::collections::HashMap::with_capacity(16);
-        map_infos.insert(1, rpg::MapInfo::default());
-        let map_infos = RefCell::new(rpg::MapInfos {
-            data: map_infos,
-            ..Default::default()
-        });
+        let map_infos = RefCell::default();
 
         let system = rpg::System {
             magic_number: rand::random(),
@@ -312,7 +305,7 @@ impl Data {
             let map_infos = map_infos.borrow();
             if map_infos.modified {
                 modified = true;
-                write_data(&map_infos.data, filesystem, "MapInfos.rxdata")
+                write_data(&*map_infos, filesystem, "MapInfos.rxdata")
                     .wrap_err("While saving MapInfos.rxdata")?;
             }
         }

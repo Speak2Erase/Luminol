@@ -50,12 +50,6 @@ pub mod rpg {
         Troops, Troop,
         Weapons, Weapon,
     }
-
-    #[derive(Debug, Default)]
-    pub struct MapInfos {
-        pub data: std::collections::HashMap<usize, MapInfo>,
-        pub modified: bool,
-    }
 }
 
 pub use shared::BlendMode;
