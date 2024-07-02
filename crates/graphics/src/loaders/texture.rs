@@ -24,12 +24,12 @@
 
 use dashmap::DashMap;
 
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 
 use wgpu::util::DeviceExt;
 
 pub struct Loader {
-    loaded_textures: DashMap<camino::Utf8PathBuf, Arc<Texture>>,
+    loaded_textures: DashMap<camino::Utf8PathBuf, Weak<Texture>>,
 
     placeholder_texture: Arc<Texture>,
     blank_autotile_texture: Arc<Texture>,
@@ -231,18 +231,21 @@ impl Loader {
 
         let texture =
             register_native_texture(self.render_state.clone(), texture, Some(path.as_str()));
-        self.loaded_textures.insert(path, texture.clone());
+        self.loaded_textures.insert(path, Arc::downgrade(&texture));
         texture
     }
 
     pub fn get(&self, path: impl AsRef<camino::Utf8Path>) -> Option<Arc<Texture>> {
-        self.loaded_textures.get(path.as_ref()).as_deref().cloned()
+        self.loaded_textures
+            .get(path.as_ref())
+            .as_deref()
+            .and_then(Weak::upgrade)
     }
 
     pub fn remove(&self, path: impl AsRef<camino::Utf8Path>) -> Option<Arc<Texture>> {
         self.loaded_textures
             .remove(path.as_ref())
-            .map(|(_, value)| value)
+            .and_then(|(_, value)| value.upgrade())
     }
 
     pub fn clear(&self) {
