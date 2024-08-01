@@ -1,0 +1,16 @@
+# Luckily because this package is built for wasm32-wasip1 and not wasm32-unknown-unknown
+# we don't need to worry about Luminol's wasm rustflags getting in the way of this build.
+cargo-features = ["per-package-target"]
+
+[package]
+name = "rust_example"
+version = "0.1.0"
+edition = "2021"
+
+forced-target = "wasm32-wasip1"
+
+[dependencies]
+wit-bindgen = "0.28.0"
+
+[lib]
+crate-type = ["cdylib"]

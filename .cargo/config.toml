@@ -14,7 +14,7 @@ rustflags = [
 	"threads=8",
 ]
 
-[target.'cfg(target_arch = "wasm32")']
+[target.wasm32-unknown-unknown]
 rustflags = [
 	"--cfg=web_sys_unstable_apis",
 	"-C",

@@ -1,0 +1,7 @@
+package luminol:test;
+
+world test {
+  import print: func(msg: string);
+
+  export run: func();
+}
