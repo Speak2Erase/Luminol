@@ -3518,6 +3518,8 @@ dependencies = [
 name = "luminol-plugins"
 version = "0.4.0"
 dependencies = [
+ "color-eyre",
+ "slab",
  "wasm-bridge",
 ]
 
