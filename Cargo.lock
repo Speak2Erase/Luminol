@@ -3158,6 +3158,7 @@ dependencies = [
  "base64 0.22.1",
  "bytemuck",
  "camino",
+ "egui",
  "flate2",
  "num_enum",
  "paste",
@@ -3254,6 +3255,7 @@ dependencies = [
  "rfd",
  "ron",
  "rust-ini",
+ "serde_json",
  "slab",
  "tempfile",
  "thiserror",
@@ -5063,11 +5065,12 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.120"
+version = "1.0.122"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e0d21c9a8cae1235ad58a00c11cb40d4b1e5c784f1ef2c537876ed6ffd8b7c5"
+checksum = "784b6203951c57ff748476b126ccb5e8e2959a5c19e5c617ab1956be3dbc68da"
 dependencies = [
  "itoa",
+ "memchr",
  "ryu",
  "serde",
 ]

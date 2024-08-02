@@ -3,4 +3,5 @@ Command(
     // Multi commands implies that the command is just text
     // 401 is the continuation id
     kind: Multi(401),
+    color: Color32((237, 237, 237, 255))
 )

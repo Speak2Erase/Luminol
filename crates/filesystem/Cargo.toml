@@ -37,6 +37,7 @@ egui.workspace = true
 
 ron.workspace = true
 rust-ini.workspace = true
+serde_json = "1.0.122"
 
 tracing.workspace = true
 

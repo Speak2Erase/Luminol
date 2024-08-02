@@ -6,6 +6,7 @@ pub type Code = u16;
 pub struct Command {
     pub name: String,
     pub kind: CommandKind,
+    pub color: egui::Color32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

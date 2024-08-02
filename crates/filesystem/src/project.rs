@@ -137,14 +137,10 @@ impl FileSystem {
             }
         };
 
-        let pretty_config = ron::ser::PrettyConfig::new()
-            .struct_names(true)
-            .enumerate_arrays(true);
-
         let project = match self
-            .read_to_string(".luminol/config.ron")
+            .read_to_string(".luminol/config.json")
             .ok()
-            .and_then(|s| ron::from_str::<luminol_config::project::Project>(&s).ok())
+            .and_then(|s| serde_json::from_str::<luminol_config::project::Project>(&s).ok())
         {
             Some(config) if config.persistence_id != 0 => config,
             Some(mut config) => {
@@ -152,8 +148,8 @@ impl FileSystem {
                     config.persistence_id = rand::random();
                 }
                 self.write(
-                    ".luminol/config.ron",
-                    ron::ser::to_string_pretty(&config, pretty_config.clone()).wrap_err(c)?,
+                    ".luminol/config.json",
+                    serde_json::to_string_pretty(&config).wrap_err(c)?,
                 )
                 .wrap_err(c)?;
                 config
@@ -173,8 +169,8 @@ impl FileSystem {
                     ..Default::default()
                 };
                 self.write(
-                    ".luminol/config.ron",
-                    ron::ser::to_string_pretty(&config, pretty_config.clone()).wrap_err(c)?,
+                    ".luminol/config.json",
+                    serde_json::to_string_pretty(&config).wrap_err(c)?,
                 )
                 .wrap_err(c)?;
                 config
@@ -182,16 +178,16 @@ impl FileSystem {
         };
 
         let command_db = match self
-            .read_to_string(".luminol/commands.ron")
+            .read_to_string(".luminol/commands.json")
             .ok()
-            .and_then(|s| ron::from_str(&s).ok())
+            .and_then(|s| serde_json::from_str(&s).ok())
         {
             Some(c) => c,
             None => {
                 let command_db = luminol_config::command_db::CommandDB::new(project.editor_ver);
                 self.write(
-                    ".luminol/commands.ron",
-                    ron::ser::to_string_pretty(&command_db, pretty_config.clone()).wrap_err(c)?,
+                    ".luminol/commands.json",
+                    serde_json::to_string_pretty(&command_db).wrap_err(c)?,
                 )
                 .wrap_err(c)?;
                 command_db

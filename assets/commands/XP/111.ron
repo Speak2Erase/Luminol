@@ -1,6 +1,5 @@
 Command(
   name: "Conditional Branch",
-  // branches always have 1 branch + some extras
   kind: Branch(
     parameters: [
       Parameter(
@@ -75,7 +74,7 @@ Command(
             )
           ],
           [
-            
+
           ]
         ]),
       )
@@ -96,5 +95,6 @@ Command(
       name: "End Branch"
     ),
     command_contains_branch: true,
-  )
+  ),
+  color: Color32((45, 155, 252, 255))
 )

@@ -316,21 +316,17 @@ impl Data {
             }
         }
 
-        let pretty_config = ron::ser::PrettyConfig::new()
-            .struct_names(true)
-            .enumerate_arrays(true);
-
-        let project_config = ron::ser::to_string_pretty(&config.project, pretty_config.clone())
-            .wrap_err("While serializing .luminol/config.ron")?;
+        let project_config = serde_json::to_string_pretty(&config.project)
+            .wrap_err("While serializing .luminol/config.json")?;
         filesystem
             .write(".luminol/config", project_config)
-            .wrap_err("While writing .luminol/config.ron")?;
+            .wrap_err("While writing .luminol/config.json")?;
 
-        let command_db = ron::ser::to_string_pretty(&config.command_db, pretty_config.clone())
-            .wrap_err("While serializing .luminol/commands.ron")?;
+        let command_db = serde_json::to_string_pretty(&config.command_db)
+            .wrap_err("While serializing .luminol/commands.json")?;
         filesystem
             .write(".luminol/commands", command_db)
-            .wrap_err("While writing .luminol/config.ron")?;
+            .wrap_err("While writing .luminol/config.json")?;
 
         // even though Ini uses fmt::write internally, it provides no easy way to write to a string.
         // so we need to open a file instead

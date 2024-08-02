@@ -178,13 +178,10 @@ fn convert_project(
     let to = FormatHandler::new(selected_data_format);
 
     // TODO handle errors
-    let pretty_config = ron::ser::PrettyConfig::new()
-        .struct_names(true)
-        .enumerate_arrays(true);
     config.project.data_format = selected_data_format;
-    let project_config = ron::ser::to_string_pretty(&config.project, pretty_config).unwrap();
+    let project_config = serde_json::to_string_pretty(&config.project).unwrap();
     filesystem
-        .write(".luminol/config.ron", project_config)
+        .write(".luminol/config.json", project_config)
         .unwrap();
 
     let host = filesystem.host().unwrap(); // This bypasses the path cache (which is BAD!) so we will need to regen it later
