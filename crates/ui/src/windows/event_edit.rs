@@ -284,6 +284,13 @@ impl luminol_core::Window for Window {
                         });
                     });
                 });
+
+                egui::CentralPanel::default().show_inside(ui, |ui| {
+                    ui.label("Commands");
+
+                    let mut view = luminol_components::CommandView::new();
+                    view.ui(ui, &mut page.list);
+                });
             });
 
         if graphic_modified {

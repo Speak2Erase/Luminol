@@ -1,0 +1,95 @@
+Command(
+  code: 111, // Conditional Branch
+  name: "Conditional Branch",
+  // branches always have 1 branch + some extras
+  kind: Branch(
+    parameters: [
+      Parameter(
+        index: 0,
+        name: "Condition",
+        // selector is a map of the possible values to parameters
+        kind: Selector([
+          [
+            Parameter(
+              index: 1,
+              name: "Switch ID",
+              kind: Switch,
+            ),
+            Parameter(
+              index: 2,
+              name: "State",
+              kind: IntBool,
+            )
+          ],
+          [
+            Parameter(
+              index: 1,
+              name: "Variable ID",
+              kind: Variable,
+            ),
+            Parameter(
+              index: 4,
+              name: "Operator",
+              kind: Enum([
+                "Equal to",
+                "Greater than or Equals to",
+                "Less than or Equals to",
+                "Greater than",
+                "Less Than",
+                "Not Equal"
+              ]),
+            ),
+            Parameter(
+              index: 2,
+              name: "Value",
+              kind: Selector([
+                [
+                  Parameter(
+                    index: 3,
+                    name: "Constant",
+                    kind: Int,
+                  )
+                ],
+                [
+                  Parameter(
+                    index: 3,
+                    name: "Variable ID",
+                    kind: Variable,
+                  )
+                ]
+              ])
+            )
+          ],
+          [
+            Parameter(
+              index: 1,
+              name: "Self Switch",
+              kind: SelfSwitch,
+            ),
+            Parameter(
+              index: 2,
+              name: "State",
+              kind: IntBool,
+            )
+          ]
+        ]),
+      )
+    ],
+    branches: [
+      Branch(
+        code: 411, // Else
+        name: "Else",
+        condition: Condition(
+          // no idea what index the else is
+          parameter: 0, // the parameter index of the condition
+          kind: IsTrue,
+        )
+      )
+    ],
+    terminator: Command(
+      code: 412, // End Branch
+      name: "End Branch",
+      kind: Blank
+    )
+  )
+)
