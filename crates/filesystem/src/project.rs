@@ -142,7 +142,7 @@ impl FileSystem {
             .enumerate_arrays(true);
 
         let project = match self
-            .read_to_string(".luminol/config")
+            .read_to_string(".luminol/config.ron")
             .ok()
             .and_then(|s| ron::from_str::<luminol_config::project::Project>(&s).ok())
         {
@@ -152,7 +152,7 @@ impl FileSystem {
                     config.persistence_id = rand::random();
                 }
                 self.write(
-                    ".luminol/config",
+                    ".luminol/config.ron",
                     ron::ser::to_string_pretty(&config, pretty_config.clone()).wrap_err(c)?,
                 )
                 .wrap_err(c)?;
@@ -173,7 +173,7 @@ impl FileSystem {
                     ..Default::default()
                 };
                 self.write(
-                    ".luminol/config",
+                    ".luminol/config.ron",
                     ron::ser::to_string_pretty(&config, pretty_config.clone()).wrap_err(c)?,
                 )
                 .wrap_err(c)?;
@@ -182,7 +182,7 @@ impl FileSystem {
         };
 
         let command_db = match self
-            .read_to_string(".luminol/commands")
+            .read_to_string(".luminol/commands.ron")
             .ok()
             .and_then(|s| ron::from_str(&s).ok())
         {
@@ -190,7 +190,7 @@ impl FileSystem {
             None => {
                 let command_db = luminol_config::command_db::CommandDB::new(project.editor_ver);
                 self.write(
-                    ".luminol/commands",
+                    ".luminol/commands.ron",
                     ron::ser::to_string_pretty(&command_db, pretty_config.clone()).wrap_err(c)?,
                 )
                 .wrap_err(c)?;

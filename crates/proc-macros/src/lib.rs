@@ -37,3 +37,61 @@ pub fn include_asset_str(input: TokenStream) -> TokenStream {
     };
     tokens.into()
 }
+
+#[proc_macro]
+pub fn include_asset_dir(input: TokenStream) -> TokenStream {
+    let path: syn::LitStr = syn::parse(input).expect("Not a string literal");
+    let path = path.value();
+
+    let asset_path = resolve_asset_path(path);
+    let entries = std::fs::read_dir(asset_path).expect("Failed to read asset directory");
+
+    let iter_tokens = entries.filter_map(Result::ok).map(|entry| {
+        let path = entry.file_name();
+        let path = path.to_string_lossy();
+
+        let literal = syn::LitStr::new(&path, proc_macro::Span::call_site().into());
+
+        quote::quote! {
+            (#literal, include_bytes!(#path))
+        }
+    });
+
+    let tokens = quote::quote! {
+        [
+            #(#iter_tokens),*
+        ]
+    };
+    tokens.into()
+}
+
+#[proc_macro]
+pub fn include_asset_dir_ids(input: TokenStream) -> TokenStream {
+    let path: syn::LitStr = syn::parse(input).expect("Not a string literal");
+    let path = path.value();
+
+    let asset_path = resolve_asset_path(path);
+    let entries = std::fs::read_dir(asset_path).expect("Failed to read asset directory");
+
+    let iter_tokens = entries.filter_map(Result::ok).map(|entry| {
+        let path = entry.path();
+
+        let filename = path.file_stem().unwrap();
+        let filename = filename.to_string_lossy();
+
+        let path = path.to_string_lossy();
+
+        let literal = syn::LitInt::new(&filename, proc_macro::Span::call_site().into());
+
+        quote::quote! {
+            (#literal, include_bytes!(#path).as_slice())
+        }
+    });
+
+    let tokens = quote::quote! {
+        [
+            #(#iter_tokens),*
+        ]
+    };
+    tokens.into()
+}

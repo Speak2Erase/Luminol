@@ -3114,6 +3114,7 @@ dependencies = [
  "egui",
  "indexmap",
  "luminol-data",
+ "luminol-macros",
  "once_cell",
  "ron",
  "rust-ini",

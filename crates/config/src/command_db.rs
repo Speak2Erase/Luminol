@@ -22,38 +22,37 @@
 // terms of the Steamworks API by Valve Corporation, the licensors of this
 // Program grant you additional permission to convey the resulting work.
 
-use luminol_data::commands::CommandDescription;
+use luminol_data::commands::Command;
 use once_cell::sync::Lazy;
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
 use super::RMVer;
 
-static XP_DEFAULT: Lazy<Vec<CommandDescription>> = Lazy::new(|| {
-    ron::from_str(include_str!("commands/xp.ron")).expect(
-        "failed to statically load the default commands for rpg maker xp. please report this bug",
-    )
+type CommandSet = HashMap<u16, Command>;
+static XP_DEFAULT: Lazy<CommandSet> = Lazy::new(|| {
+    let dir = luminol_macros::include_asset_dir_ids!("assets/commands/XP");
+    dir.into_iter()
+        .map(|(id, data)| {
+            let str = std::str::from_utf8(data).unwrap();
+            let cmd = ron::from_str(str).unwrap();
+            (id, cmd)
+        })
+        .collect()
 });
 
-static VX_DEFAULT: Lazy<Vec<CommandDescription>> = Lazy::new(|| {
-    ron::from_str(include_str!("commands/vx.ron")).expect(
-        "failed to statically load the default commands for rpg maker vx. please report this bug",
-    )
-});
+static VX_DEFAULT: Lazy<CommandSet> = Lazy::new(|| todo!());
 
-static ACE_DEFAULT: Lazy<Vec<CommandDescription>> = Lazy::new(|| {
-    ron::from_str(include_str!("commands/ace.ron")).expect(
-        "failed to statically load the default commands for rpg maker vx ace. please report this bug",
-    )
-});
+static ACE_DEFAULT: Lazy<CommandSet> = Lazy::new(|| todo!());
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct CommandDB {
     /// Default commands
-    default: Vec<CommandDescription>,
+    default: CommandSet,
     /// User defined commands
     // FIXME: visible to user?
-    pub user: Vec<CommandDescription>,
+    pub user: CommandSet,
 }
 
 impl CommandDB {
@@ -65,22 +64,23 @@ impl CommandDB {
                 RMVer::Ace => &*ACE_DEFAULT,
             }
             .clone(),
-            user: vec![],
+            user: HashMap::new(),
         }
     }
 
-    pub fn get(&self, code: u16) -> Option<&CommandDescription> {
-        self.user
-            .iter()
-            .find(|c| c.code == code)
-            .or_else(|| self.default.iter().find(|c| c.code == code))
+    pub fn get(&self, id: u16) -> Option<&Command> {
+        self.user.get(&id).or_else(|| self.default.get(&id))
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &CommandDescription> {
+    pub fn get_mut(&mut self, id: u16) -> Option<&mut Command> {
+        self.user.get_mut(&id).or_else(|| self.default.get_mut(&id))
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&u16, &Command)> {
         self.default.iter().chain(self.user.iter())
     }
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut CommandDescription> {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&u16, &mut Command)> {
         self.default.iter_mut().chain(self.user.iter_mut())
     }
 

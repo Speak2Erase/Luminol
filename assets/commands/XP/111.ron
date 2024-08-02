@@ -1,5 +1,4 @@
 Command(
-  code: 111, // Conditional Branch
   name: "Conditional Branch",
   // branches always have 1 branch + some extras
   kind: Branch(
@@ -15,6 +14,7 @@ Command(
               name: "Switch ID",
               kind: Switch,
             ),
+            Label("is"),
             Parameter(
               index: 2,
               name: "State",
@@ -27,6 +27,7 @@ Command(
               name: "Variable ID",
               kind: Variable,
             ),
+            Label("is"),
             Parameter(
               index: 4,
               name: "Operator",
@@ -66,11 +67,15 @@ Command(
               name: "Self Switch",
               kind: SelfSwitch,
             ),
+            Label("is"),
             Parameter(
               index: 2,
               name: "State",
               kind: IntBool,
             )
+          ],
+          [
+            
           ]
         ]),
       )
@@ -86,10 +91,10 @@ Command(
         )
       )
     ],
-    terminator: Command(
+    terminator: Terminator(
       code: 412, // End Branch
-      name: "End Branch",
-      kind: Blank
-    )
+      name: "End Branch"
+    ),
+    command_contains_branch: true,
   )
 )

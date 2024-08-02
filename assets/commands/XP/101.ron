@@ -1,5 +1,4 @@
 Command(
-    code: 101, // Show Text
     name: "Show Text",
     // Multi commands implies that the command is just text
     // 401 is the continuation id

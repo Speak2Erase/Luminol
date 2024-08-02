@@ -183,7 +183,9 @@ fn convert_project(
         .enumerate_arrays(true);
     config.project.data_format = selected_data_format;
     let project_config = ron::ser::to_string_pretty(&config.project, pretty_config).unwrap();
-    filesystem.write(".luminol/config", project_config).unwrap();
+    filesystem
+        .write(".luminol/config.ron", project_config)
+        .unwrap();
 
     let host = filesystem.host().unwrap(); // This bypasses the path cache (which is BAD!) so we will need to regen it later
     let scripts_filename = config.project.scripts_path.clone();

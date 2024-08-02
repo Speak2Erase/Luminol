@@ -27,7 +27,10 @@
 	],
 	"rust-analyzer.showUnlinkedFileNotification": false,
 	"rust-analyzer.cargo.extraEnv": {
-		"CARGO_PROFILE_RUST_ANALYZER_INHERITS": "dev"
+		"CARGO_PROFILE_RUST_ANALYZER_INHERITS": "dev",
+	},
+	"rust-analyzer.server.extraEnv": {
+		"LUMINOL_ASSETS_PATH": "${workspaceFolder}/assets"
 	},
 	"rust-analyzer.cargo.extraArgs": [],
 	"rust-analyzer.check.extraArgs": [
