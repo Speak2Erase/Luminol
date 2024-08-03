@@ -12,6 +12,7 @@ categories.workspace = true
 
 [dependencies]
 wasm-bridge = { version = "0.4.0", features = ["component-model"] }
+wasmtime-wasi = "19.0.2"
 slab.workspace = true
 color-eyre.workspace = true
 

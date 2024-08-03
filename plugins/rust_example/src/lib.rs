@@ -9,7 +9,7 @@ struct TheGuest;
 
 impl Guest for TheGuest {
     fn run() {
-        print("Hello from Rust!");
+        print("Hello from a plugin!");
     }
 }
 
