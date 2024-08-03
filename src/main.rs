@@ -60,9 +60,9 @@ pub fn git_revision() -> &'static str {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let plugin_bytes = include_bytes!("../plugins/rust_example/rust_example.wasm");
-    let mut plugins = luminol_plugins::Plugins::new();
-    plugins.load_plugin(plugin_bytes).unwrap();
+    // let plugin_bytes = include_bytes!("../plugins/rust_example/rust_example.wasm");
+    // let mut plugins = luminol_plugins::Plugins::new();
+    // plugins.load_plugin(plugin_bytes).unwrap();
 
     // Load the panic report from the previous run if it exists
     let mut report = None;
