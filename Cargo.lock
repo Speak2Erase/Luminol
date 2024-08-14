@@ -3063,16 +3063,17 @@ dependencies = [
  "color-eyre",
  "flume",
  "fragile",
+ "luminol-config",
  "luminol-filesystem",
  "once_cell",
  "oneshot",
  "parking_lot",
- "poll-promise",
  "rodio",
  "rustysynth",
  "slab",
  "strum",
  "thiserror",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
@@ -3306,10 +3307,12 @@ dependencies = [
  "egui",
  "fuzzy-matcher",
  "glam",
+ "lexical-sort",
  "luminol-components",
  "luminol-core",
  "luminol-data",
  "luminol-egui-wgpu",
+ "luminol-graphics",
  "ouroboros",
 ]
 
