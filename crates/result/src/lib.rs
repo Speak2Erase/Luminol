@@ -22,17 +22,31 @@
 // terms of the Steamworks API by Valve Corporation, the licensors of this
 // Program grant you additional permission to convey the resulting work.
 
-fn main() {
-    #[cfg(windows)]
-    {
-        let mut res = winres::WindowsResource::new();
-        res.set_icon("assets/icons/native/windows-icon.ico");
-        res.set("ProductVersion", env!("CARGO_PKG_VERSION"));
-        res.set_icon_with_id("assets/icons/native/rxproj-icon.ico", "2");
-        res.set_icon_with_id("assets/icons/native/rxdata-icon.ico", "3");
-        res.set_icon_with_id("assets/icons/native/lumproj-icon.ico", "4");
-        res.set_language(0x0009);
+use std::io;
 
-        let _ = res.compile();
-    }
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[cfg(feature = "steamworks")]
+    #[error("Steam error: {0}\nPerhaps you want to compile yourself a free copy?")]
+    Steamworks(#[from] steamworks::SteamError),
+    #[error("Failed to install color-eyre hooks")]
+    ColorEyreInstall(#[from] color_eyre::eyre::InstallError),
+    #[error("I/O Error: {0}")]
+    Io(#[from] io::Error),
+    #[error("Temporary file error: {0}")]
+    TempFilePersist(#[from] tempfile::PersistError),
+    #[error("Image loader error: {0}")]
+    Image(#[from] image::ImageError),
+    #[cfg(target_arch = "wasm32")]
+    #[error("Failed to initialise tracing-log")]
+    Tracing(#[from] tracing_log::log::SetLoggerError),
+
+    #[error("Could not get path to the current executable")]
+    ExePathQueryFailed,
+    #[error("Egui context cell has been already set (this shouldn't happen!)")]
+    EguiContextCellAlreadySet,
 }
+
+pub type Result<T> = core::result::Result<T, Error>;

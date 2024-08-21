@@ -22,11 +22,10 @@
 // terms of the Steamworks API by Valve Corporation, the licensors of this
 // Program grant you additional permission to convey the resulting work.
 
-use std::sync::Arc;
-
-use crate::lumi::Lumi;
+use crate::{lumi::Lumi, BUILD_DIAGNOSTIC};
 #[cfg(feature = "steamworks")]
 use crate::steam::Steamworks;
+use std::sync::Arc;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod log_window;
@@ -344,7 +343,7 @@ impl luminol_eframe::App for App {
             modified: self.modified.clone(),
             modified_during_prev_frame: &mut self.modified_during_prev_frame,
             project_manager: &mut self.project_manager,
-            git_revision: crate::git_revision(),
+            build_diagnostics: &BUILD_DIAGNOSTIC
         };
 
         // If a file/folder picker is open, prevent the user from interacting with the application
