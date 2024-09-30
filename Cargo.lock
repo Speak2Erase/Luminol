@@ -1155,6 +1155,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "command_parser"
+version = "0.4.0"
+dependencies = [
+ "luminol-config",
+ "luminol-core",
+ "luminol-data",
+ "luminol-filesystem",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

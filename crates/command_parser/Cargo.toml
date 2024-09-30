@@ -1,0 +1,23 @@
+[package]
+name = "command_parser"
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+luminol-filesystem.workspace = true
+luminol-config.workspace = true
+luminol-data.workspace = true
+luminol-core.workspace = true
