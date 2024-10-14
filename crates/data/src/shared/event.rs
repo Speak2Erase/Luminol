@@ -284,7 +284,7 @@ impl From<SelfSwitch> for String {
     }
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, Default)]
 #[derive(alox_48::Deserialize, alox_48::Serialize)]
 #[allow(missing_docs)]
 #[marshal(class = "RPG::EventCommand")]
@@ -292,10 +292,4 @@ pub struct EventCommand {
     pub code: u16,
     pub indent: usize,
     pub parameters: Vec<ParameterType>,
-
-    #[marshal(default = "rand::random")]
-    #[marshal(skip)]
-    #[serde(default = "rand::random")]
-    #[serde(skip)]
-    pub guid: u16,
 }
